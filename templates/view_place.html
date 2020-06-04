@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>View Location</title> 
+        <link rel="stylesheet" type="text/css" href="/static/view_place.css" />
+    </head>
+    <body>
+        <div class="main-page"></div>
+            <div class="menu">
+                <ul>
+                    <li><a href="/home">Home</a></li>
+                    <li><a href="/add_location">Add Location</a></li>
+                    <li><a href="/add_link">Add Link</a></li>
+                </ul>
+            </div>
+            <div class="location-page">
+                <div class="location">
+                    <div class="location-image">
+                        <image src="/static/images/{{ place['image'] }}" /> 
+                    </div>
+                    <div class="location-info">
+                        <div class="location-name">
+                            <a> {{place["Name"]}}</a>
+                        </div>
+                        <div style="display: flex">
+                            <div class="location-label">Capacity: </div>
+                            <div class="location-capacity">{{place["Capacity"]}}</div>
+                        </div>
+                        <div style="display: flex">
+                            <div class="location-label">Availability: </div>
+                            <div class="location-availability">{{place["Availability"]}}</div>
+                        </div>
+                        <div style="display: flex">
+                            <div class="location-label">Description: </div>
+                            <div class="location-description">{{place["Description"]}}</div>
+                        </div>
+                        <div class="buttons"> 
+                            <div class="edit_button">
+                                <a href="{{ url_for('edit_location', location=place['Name']) }}">Edit</a>
+                            </div>
+                            {% if exitFlag != 0 %}
+                            <div class="buttons"> 
+                                <form href="{{ url_for('change_location', location=place['Name']) }}" method="post" enctype = "multipart/form-place">
+                                {% if request.form["submit"] is undefined %}
+                                <select name="exit">
+                                    {% for location in linked_locations %}
+                                        <option value="{{ location['location2'] }}">{{ location["location2"] }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="submit" value="submit">Confirm Location</button>
+                                {% endif %}
+                                </form>
+                                {% if request.form["submit"] is not undefined %}
+                                <div class="edit_button">
+                                    <a href="{{ url_for('view_location', location=request.form['exit']) }}">Exit</a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </body>
+</html>

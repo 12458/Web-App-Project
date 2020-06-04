@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="static/img/logo_r_resumme.png" type="image/x-icon" />
+    <title>Log In</title>
+    <script src="static/js/particles.js"></script>
+    <script src="static/js/main.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
+    <link rel="stylesheet" href="static/login_v2.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+</head>
+
+<body>
+    {% if error %}
+    <div class="notification is-danger is-pulled-right">
+        {{ error }}
+      </div>
+    {% endif %}
+    <div class="columns is-vcentered">
+        <div class="login column is-4 ">
+            <section class="section">
+                <div class="has-text-centered">
+                    <img class="login-logo" src="static/image/logo_r_resumme.png">
+                </div>
+                <form method="post" enctype="multipart/form-place">
+                    <div class="field">
+                        <label class="label">Username</label>
+                        <div class="control has-icons-right">
+                            <input class="input" type="text" name="userId" placeholder="Username" autofocus required>
+                            <span class="icon is-small is-right">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <p class="help {{ user_color }}">{{ error_user }}</p>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Password</label>
+                        <div class="control has-icons-right">
+                            <input class="input" type="password" name="password" placeholder="Password" required>
+                            <span class="icon is-small is-right">
+                                <i class="fa fa-key"></i>
+                            </span>
+                            <p class="help {{ pass_color }}">{{ error_pass }}</p>
+                        </div>
+                    </div>
+                    <div class="has-text-centered">
+                        <button type="submit" name="submit"
+                            class="button is-vcentered is-primary is-outlined">Login</button>
+                    </div>
+                    <div class="has-text-centered">
+                        <a href="signup"> Don't you have an account? Sign up now!</a>
+                    </div>
+                </form>
+            </section>
+        </div>
+        <div id="particles-js" class="interactive-bg column is-8">
+        </div>
+    </div>
+
+</body>
+
+</html>
