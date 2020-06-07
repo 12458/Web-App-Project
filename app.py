@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, abort
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 import os
+from functools import wraps
 
 app = Flask("__name__")
 # Set secure secret key
@@ -16,6 +17,39 @@ def open_DB(db):
 
 
 DEBUG = True
+
+
+def login_required(func):
+    '''
+    If you decorate a view with this, it will ensure that the current user is
+    logged in and authenticated before calling the actual view. (If they are
+    not, it calls the :attr:`LoginManager.unauthorized` callback.) For
+    example::
+        @app.route('/post')
+        @login_required
+        def post():
+            pass
+    If there are only certain times you need to require that your user is
+    logged in, you can do so with::
+        if not current_user.is_authenticated:
+            return current_app.login_manager.unauthorized()
+    ...which is essentially the code that this function adds to your views.
+    It can be convenient to globally turn off authentication when unit testing.
+    To enable this, if the application configuration variable `LOGIN_DISABLED`
+    is set to `True`, this decorator will be ignored.
+    .. Note ::
+        Per `W3 guidelines for CORS preflight requests
+        <http://www.w3.org/TR/cors/#cross-origin-request-with-preflight-0>`_,
+        HTTP ``OPTIONS`` requests are exempt from login checks.
+    :param func: The view function to decorate.
+    :type func: function
+    '''
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if not 'logged_in' in session:
+            return redirect('/')
+        return func(*args, **kwargs)
+    return decorated_view
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -40,6 +74,7 @@ def login():
             print(row["password"])
             print(password)
             if check_password_hash(row["password"], password):
+                session['logged_in'] = True
                 return render_template("successLogin.html")
             else:
                 print(incorrectPass)
@@ -75,7 +110,7 @@ def register():
                     cur.execute("INSERT INTO users(id, password) VALUES(?,?)",
                                 (username, generate_password_hash(password)))
                     con.commit()
-                    return render_template("successLogin.html")
+                    return redirect(url_for('login'))
                 except Exception as e:
                     print(e)
             else:
@@ -85,6 +120,7 @@ def register():
 
 
 @ app.route("/home")
+@login_required
 def home():
     con = open_DB('places.db')
     cur = con.execute("SELECT * FROM places")
@@ -93,11 +129,13 @@ def home():
 
 
 @ app.route("/add_location")
+@login_required
 def show_add_location_form():
     return render_template("add_place.html")
 
 
 @ app.route("/submit", methods=["POST"])
+@login_required
 def submit_add_location():
     name = request.form["name"]
     description = request.form["description"]
@@ -125,6 +163,7 @@ def submit_add_location():
 
 
 @ app.route("/view_location/<location>", methods=["GET", "POST"])
+@login_required
 def view_location(location):
     linked_locations = []
     try:
@@ -142,6 +181,7 @@ def view_location(location):
 
 
 @ app.route("/edit/<location>", methods=["GET"])
+@login_required
 def edit_location(location):
     try:
         con = open_DB("places.db")
@@ -155,6 +195,7 @@ def edit_location(location):
 
 
 @ app.route("/edit/<location>", methods=["POST"])
+@login_required
 def update_location(location):
     image_file_name = ""
     if "image" in request.files:
@@ -195,6 +236,7 @@ def update_location(location):
 
 
 @ app.route("/add_link", methods=["GET"])
+@login_required
 def show_add_link():
     try:
         con = open_DB("places.db")
@@ -209,6 +251,7 @@ def show_add_link():
 
 
 @ app.route("/add_link", methods=["POST"])
+@login_required
 def add_link():
     try:
         con = open_DB("places.db")
@@ -226,11 +269,17 @@ def add_link():
 
 
 @ app.route("/view_location/<location>", methods=["GET", "POST"])
+@login_required
 def change_location():
     return 0
     # return url_for(view_location(target_locaiton))
     # return redirect(url_for(view_location), location=target_locaiton)
 
+@app.route('/logout')
+@login_required
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 if __name__ == "__main__":
     app.run(debug=True)
