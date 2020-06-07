@@ -1,39 +1,97 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Main Page</title>
-        <link rel="stylesheet" type="text/css" href="/static/main.css" />
-    </head>
-    <body>
-        <div class="main-page">
-            <div class="menu">
-                <ul>
-                    <li><a class="active" href="/home">Home</a></li>
-                    <li><a href="/add_location">Add Location</a></li>
-                    <li><a href="/add_link">Add Link</a></li> 
-                </ul>
+
+<head>
+    <title>Main Page</title>
+    <!-- Scripts -->
+    <script src="static/js/particles.js"></script>
+    <script src="static/js/main.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
+    <!-- CSS -->
+    <link rel="stylesheet" href="static/login_v2.css">
+    <!-- Bulma -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Icon -->
+    <link rel="icon" href="static/images/logo_r_resumme.png" type="image/x-icon" />
+    <style>
+        .column {
+            display: flex;
+        }
+        .columns{
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="https://bulma.io">
+                <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28">
+            </a>
+
+            <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+                data-target="navbarBasicExample">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/home">
+                    Home
+                </a>
+                <a class="navbar-item" href="/add_location">
+                    Add location
+                </a>
+                <a class="navbar-item" href="/add_link">
+                    Add Link
+                </a>
             </div>
-            <div class="location-page">
-                <div class="location-list">
-                    {% for place in places %}
-                    <div class="location">
-                        <div class="location-image">
-                            <image src="/static/images/{{ place['image'] }}" /> 
-                            <div class="overlay">
-                                <div class="overlay-text">{{ place["Description"] }}</div>
-                            </div>
-                        </div>
-                        <div class="location-info">
-                            <div class="location-name">
-                                <a href="{{ url_for('view_location', location=place['Name']) }} "> {{place["Name"]}}</a>
-                            </div>
-                            <div class="location-capacity">Capacity: {{place["Capacity"]}}</div>
-                            <div class="location-availability">Availability: {{place["Availability"]}}</div>
-                        </div>
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a class="button is-primary">
+                            <strong>Sign up</strong>
+                        </a>
+                        <a class="button is-light">
+                            Log in
+                        </a>
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
-    </body>
+    </nav>
+    </section>
+    <div class="container">
+        <div class="columns is-multiline">
+            {% for place in places %}
+            <div class="column is-one-quarter">
+                <div class="box">
+                    <div class="location-image">
+                        <image src="/static/images/{{ place['image'] }}" />
+                        <div class="overlay">
+                            <div class="overlay-text">{{ place["Description"] }}</div>
+                        </div>
+                    </div>
+                    <div class="location-info">
+                        <div class="location-name">
+                            <a href="{{ url_for('view_location', location=place['Name']) }} "> {{place["Name"]}}</a>
+                        </div>
+                        <div class="location-capacity">Capacity: {{place["Capacity"]}}</div>
+                        <div class="location-availability">Availability: {{place["Availability"]}}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+
 </html>
