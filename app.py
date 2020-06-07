@@ -54,6 +54,8 @@ def login_required(func):
 
 @app.route("/", methods=["GET", "POST"])
 def login():
+    if 'logged_in' in session:
+        return redirect(url_for('home'))
     # return render_template("login.html", error="")
     if request.method == "GET":
         return render_template("login.html")
