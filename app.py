@@ -15,7 +15,7 @@ app = Flask("__name__")
 def root():
     # return render_template("login.html", error="")
     if request.method == "GET":
-        return render_template("login_v2.html")
+        return render_template("login.html")
     else:
         con = open_DB("places.db")
         cur = con.cursor()
@@ -42,7 +42,7 @@ def root():
                     except Exception as e:
                         print(e)
                 else:
-                    return render_template("login_v2.html", error_user=userExist, user_colour="is-success")
+                    return render_template("login.html", error_user=userExist, user_colour="is-success")
             except Exception as e:
                 print(e)
         else:
@@ -52,7 +52,7 @@ def root():
                 cur.execute("SELECT id FROM users WHERE id=?", (id,))
                 row = cur.fetchall()
                 if len(row) == 0:
-                    return render_template("login_v2.html", error_user=userNotExist, user_colour="is-danger")
+                    return render_template("login.html", error_user=userNotExist, user_colour="is-danger")
                 else:
                     try:
                         cur.execute("SELECT * FROM users WHERE id=?", (id,))
