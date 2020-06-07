@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 import os
 
+app = Flask("__name__")
 # Set secure secret key
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_urlsafe(16)
 
@@ -16,41 +17,33 @@ def open_DB(db):
 
 DEBUG = True
 
-app = Flask("__name__")
-
 
 @app.route("/", methods=["GET", "POST"])
-def root():
+def login():
     # return render_template("login.html", error="")
     if request.method == "GET":
         return render_template("login.html")
     else:
-        with open_DB("places.db") as con:
-            cur = con.cursor()
-            userNotExist = "This user does not exist. Please input a valid username. "
-            incorrectPass = "Incorrect password. Please try again. "
-            id = request.form["userId"]
-            password = request.form["password"]
-            try:
-                cur.execute("SELECT id FROM users WHERE id=?", (id,))
-                row = cur.fetchall()
-                if len(row) == 0:
-                    return render_template("login.html", error_user=userNotExist, user_colour="is-danger")
-                else:
-                    try:
-                        cur.execute("SELECT * FROM users WHERE id=?", (id,))
-                        row = cur.fetchone()
-                        print(row["password"])
-                        print(password)
-                        if check_password_hash(row["password"], password):
-                            return render_template("successLogin.html")
-                        else:
-                            print(incorrectPass)
-                            return render_template("login.html", error_pass=incorrectPass, pass_color="is-danger")
-                    except Exception as e:
-                        print(e)
-            except Exception as e:
-                print(e)
+        con = open_DB('places.db')
+        cur = con.cursor()
+        userNotExist = "This user does not exist. Please input a valid username. "
+        incorrectPass = "Incorrect password. Please try again. "
+        username = request.form["userId"]
+        password = request.form["password"]
+        cur.execute("SELECT id FROM users WHERE id=?", (username,))
+        row = cur.fetchall()
+        if len(row) == 0:
+            return render_template("login.html", error_user=userNotExist, user_colour="is-danger")
+        else:
+            cur.execute("SELECT * FROM users WHERE id=?", (username,))
+            row = cur.fetchone()
+            print(row["password"])
+            print(password)
+            if check_password_hash(row["password"], password):
+                return render_template("successLogin.html")
+            else:
+                print(incorrectPass)
+                return render_template("login.html", error_pass=incorrectPass, pass_color="is-danger")
     return redirect("/")
 
 
@@ -63,24 +56,24 @@ def register():
         cur = con.cursor()
         userExist = "This username already exist. Please try a new one. "
         password_unmatched = "The entered password does not match"
-        id = request.form["userId"]
+        username = request.form["userId"]
         password = request.form["password"]
         password_confirm = request.form["password_confirm"]
         # Edge case: already handled in HTML
-        if id == "" or password == "":
+        if username == "" or password == "":
             return render_template("login.html", error="Invalid Input. Please try again.")
         if password != password_confirm:
             return render_template("login.html", error_pass=password_unmatched)
         if DEBUG == True:
-            print(id)
+            print(username)
             print(password)
         try:
-            cur.execute("SELECT id FROM users WHERE id=?", (id,))
+            cur.execute("SELECT id FROM users WHERE id=?", (username,))
             row = cur.fetchall()
             if len(row) == 0:
                 try:
                     cur.execute("INSERT INTO users(id, password) VALUES(?,?)",
-                                (id, generate_password_hash(password)))
+                                (username, generate_password_hash(password)))
                     con.commit()
                     return render_template("successLogin.html")
                 except Exception as e:
