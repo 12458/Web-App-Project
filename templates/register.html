@@ -52,12 +52,22 @@
                             <p class="help {{ pass_color }}">{{ error_pass }}</p>
                         </div>
                     </div>
+                    <div class="field">
+                        <label class="label">Confirm Password</label>
+                        <div class="control has-icons-right">
+                            <input class="input" type="password" name="password_confirm" placeholder="Confirm Password" required>
+                            <span class="icon is-small is-right">
+                                <i class="fa fa-key"></i>
+                            </span>
+                            <p class="help {{ pass_color }}">{{ error_pass }}</p>
+                        </div>
+                    </div>
                     <div class="has-text-centered">
                         <button type="submit" name="submit"
                             class="button is-vcentered is-primary is-outlined">Login</button>
                     </div>
                     <div class="has-text-centered">
-                        <a href="register"> Don't you have an account? Sign up now!</a>
+                        <a href="/">Login</a>
                     </div>
                 </form>
             </section>

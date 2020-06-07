@@ -1,5 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
+from werkzeug.security import generate_password_hash, check_password_hash
+import secrets
+import os
+
+# Set secure secret key
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_urlsafe(16)
 
 
 def open_DB(db):
@@ -7,6 +13,8 @@ def open_DB(db):
     connection.row_factory = sqlite3.Row
     return connection
 
+
+DEBUG = True
 
 app = Flask("__name__")
 
@@ -17,35 +25,10 @@ def root():
     if request.method == "GET":
         return render_template("login.html")
     else:
-        con = open_DB("places.db")
-        cur = con.cursor()
-        userExist = "This username already exist. Please try a new one. "
-        userNotExist = "This user does not exist. Please input a valid username. "
-        incorrectPass = "Incorrect password. Please try again. "
-        if request.form["submit"] == "register":
-            id = request.form["userId"]
-            password = request.form["password"]
-            if id == "" or password == "":
-                return render_template("login.html", error="Invalid Input. Please try again. ")
-            # print(id)
-            # print(password)
-            try:
-                cur.execute("SELECT id FROM users WHERE id=?", (id,))
-                row = cur.fetchall()
-                if len(row) == 0:
-                    try:
-                        cur.execute(
-                            "INSERT INTO users(id, password) VALUES(?,?)", (id, password))
-                        con.commit()
-                        con.close()
-                        return render_template("successLogin.html")
-                    except Exception as e:
-                        print(e)
-                else:
-                    return render_template("login.html", error_user=userExist, user_colour="is-success")
-            except Exception as e:
-                print(e)
-        else:
+        with open_DB("places.db") as con:
+            cur = con.cursor()
+            userNotExist = "This user does not exist. Please input a valid username. "
+            incorrectPass = "Incorrect password. Please try again. "
             id = request.form["userId"]
             password = request.form["password"]
             try:
@@ -59,11 +42,11 @@ def root():
                         row = cur.fetchone()
                         print(row["password"])
                         print(password)
-                        if row["password"] == password:
+                        if check_password_hash(row["password"], password):
                             return render_template("successLogin.html")
                         else:
                             print(incorrectPass)
-                            return render_template("login_v2.html", error_pass=incorrectPass, pass_color="is-danger")
+                            return render_template("login.html", error_pass=incorrectPass, pass_color="is-danger")
                     except Exception as e:
                         print(e)
             except Exception as e:
@@ -71,7 +54,44 @@ def root():
     return redirect("/")
 
 
-@app.route("/home")
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "GET":
+        return render_template("register.html")
+    else:
+        con = open_DB('places.db')
+        cur = con.cursor()
+        userExist = "This username already exist. Please try a new one. "
+        password_unmatched = "The entered password does not match"
+        id = request.form["userId"]
+        password = request.form["password"]
+        password_confirm = request.form["password_confirm"]
+        # Edge case: already handled in HTML
+        if id == "" or password == "":
+            return render_template("login.html", error="Invalid Input. Please try again.")
+        if password != password_confirm:
+            return render_template("login.html", error_pass=password_unmatched)
+        if DEBUG == True:
+            print(id)
+            print(password)
+        try:
+            cur.execute("SELECT id FROM users WHERE id=?", (id,))
+            row = cur.fetchall()
+            if len(row) == 0:
+                try:
+                    cur.execute("INSERT INTO users(id, password) VALUES(?,?)",
+                                (id, generate_password_hash(password)))
+                    con.commit()
+                    return render_template("successLogin.html")
+                except Exception as e:
+                    print(e)
+            else:
+                return render_template("register.html", error_user=userExist, user_colour="is-success")
+        except Exception as e:
+            print(e)
+
+
+@ app.route("/home")
 def home():
     con = open_DB('places.db')
     cur = con.execute("SELECT * FROM places")
@@ -79,12 +99,12 @@ def home():
     return render_template("main.html", places=rows)
 
 
-@app.route("/add_location")
+@ app.route("/add_location")
 def show_add_location_form():
     return render_template("add_place.html")
 
 
-@app.route("/submit", methods=["POST"])
+@ app.route("/submit", methods=["POST"])
 def submit_add_location():
     name = request.form["name"]
     description = request.form["description"]
@@ -111,7 +131,7 @@ def submit_add_location():
     return redirect("/home")
 
 
-@app.route("/view_location/<location>", methods=["GET", "POST"])
+@ app.route("/view_location/<location>", methods=["GET", "POST"])
 def view_location(location):
     linked_locations = []
     try:
@@ -128,7 +148,7 @@ def view_location(location):
     return render_template("view_place.html", place=row, linked_locations=linked_locations, exitFlag=exitFlag)
 
 
-@app.route("/edit/<location>", methods=["GET"])
+@ app.route("/edit/<location>", methods=["GET"])
 def edit_location(location):
     try:
         con = open_DB("places.db")
@@ -141,7 +161,7 @@ def edit_location(location):
     return render_template("edit_place.html", place=row)
 
 
-@app.route("/edit/<location>", methods=["POST"])
+@ app.route("/edit/<location>", methods=["POST"])
 def update_location(location):
     image_file_name = ""
     if "image" in request.files:
@@ -181,7 +201,7 @@ def update_location(location):
     return render_template("view_place.html", place=row)
 
 
-@app.route("/add_link", methods=["GET"])
+@ app.route("/add_link", methods=["GET"])
 def show_add_link():
     try:
         con = open_DB("places.db")
@@ -195,7 +215,7 @@ def show_add_link():
     return render_template("add_link.html", location_list=location_list)
 
 
-@app.route("/add_link", methods=["POST"])
+@ app.route("/add_link", methods=["POST"])
 def add_link():
     try:
         con = open_DB("places.db")
@@ -212,7 +232,7 @@ def add_link():
     return redirect("/home")
 
 
-@app.route("/view_location/<location>", methods=["GET", "POST"])
+@ app.route("/view_location/<location>", methods=["GET", "POST"])
 def change_location():
     return 0
     # return url_for(view_location(target_locaiton))
