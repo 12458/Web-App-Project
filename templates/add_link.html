@@ -3,40 +3,111 @@
 
 <head>
     <title>Add Link</title>
-    <link rel="stylesheet" type="text/css" href="/static/add_link.css" />
+    <!-- Scripts -->
+    <script src="static/js/particles.js"></script>
+    <script src="static/js/main.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
+    <!-- CSS -->
+    <link rel="stylesheet" href="static/login_v2.css">
+    <!-- Bulma -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Icon -->
+    <link rel="icon" href="static/images/logo_r_resumme.png" type="image/x-icon" />
 </head>
 
 <body>
-    <div>
-        <div class="menu">
-            <ul>
-                <li><a href="/home">Home</a></li>
-                <li><a href="/add_location">Add Location</a></li>
-                <li><a class="active" href="/add_link">Add Link</a></li>
-            </ul>
-        </div>
-        <div class="form-page">
-            <form action="{{ url_for('add_link') }}" method="post" enctype="multipart/form-place">
-                <div>
-                    <label>Location 1: </label>
-                    <select name="location_1" required="required">
-                        {% for location in location_list %}
-                        <option value="{{ location['name'] }}">{{ location["name"] }}</option>
-                        {% endfor %}
-                    </select>
+    <section>
+        <nav class="navbar" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="https://bulma.io">
+                    <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28">
+                </a>
+
+                <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbarBasicExample">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbarBasicExample" class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item" href="/home">
+                        Home
+                    </a>
+                    <a class="navbar-item" href="/add_location">
+                        Add location
+                    </a>
+                    <a class="navbar-item" href="/add_link">
+                        Add Link
+                    </a>
                 </div>
-                <div>
-                    <label>Location 2: </label>
-                    <select name="location_2" required="required">
-                        {% for location in location_list %}
-                        <option value="{{ location['name'] }}">{{ location["name"] }}</option>
-                        {% endfor %}
-                    </select>
+
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a class="button is-primary">
+                                <strong>Sign up</strong>
+                            </a>
+                            <a class="button is-light">
+                                Log in
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <button class="button" type="submit" name="submit" value="update">Add Link bewteen locations</button>
-            </form>
+            </div>
+        </nav>
+    </section>
+    <section class="container has-text-centered">
+        <div class="columns is-mobile is-centered">
+            <div class="column is-half">
+                <div class="box">
+                    <form action="{{ url_for('add_link') }}" method="post" enctype="multipart/form-place">
+
+
+                        <div class="field">
+                            <label class="label">Location 1: </label>
+                            <div class="control">
+                                <div class="select">
+                                    <select name="location_1" required>
+                                        {% for location in location_list %}
+                                        <option value="{{ location['name'] }}">{{ location["name"] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Location 2: </label>
+                            <div class="control">
+                                <div class="select">
+                                    <select name="location_2" required>
+                                        {% for location in location_list %}
+                                        <option value="{{ location['name'] }}">{{ location["name"] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-link" type="submit" name="submit" value="update">Add
+                                    Link</button>
+                            </div>
+                            <div class="control">
+                                <button class="button is-link is-light" type="reset" value="Reset">Cancel</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 </body>
 
 </html>
