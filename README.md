@@ -23,7 +23,7 @@
   - [Acknowledgements](#acknowledgements)
   
 # Assessment Information
-Due on: Term 3B Week 6, 4 Sep 2020
+Due on: Term 3B Week 6, 4 Sep 2020\
 Assessment weightage (12%)
 
 # Problem Statement
