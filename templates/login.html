@@ -4,8 +4,8 @@
 <head>
     <title>Log In</title>
     <!-- Scripts -->
-    <script src="static/js/particles.js"></script>
-    <script src="static/js/main.js"></script>
+    <!-- <script src="static/js/particles.js"></script>
+    <script src="static/js/main.js"></script> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
     <!-- CSS -->
     <link rel="stylesheet" href="static/login_v2.css">
@@ -16,6 +16,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Icon -->
     <link rel="icon" href="/static/images/njc_logo_square.png" type="image/x-icon" />
+    <style>
+        img {
+            height: 100vh;
+        }
+
+        .columns {
+            display: flex;
+            height: 100vh;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,11 +34,11 @@
         {{ error }}
     </div>
     {% endif %}
-    <div class="columns is-vcentered">
+    <div class="columns is-vcentered is-gapless">
         <div class="login column is-4 ">
             <section class="section">
                 <div class="has-text-centered">
-                    <img class="login-logo" src="static/images/njc_logo.png">
+                    <img class="login-logo" src="/static/images/njc_logo.png">
                 </div>
                 <form method="post" enctype="multipart/form-place">
                     <div class="field">
@@ -62,10 +72,13 @@
                 </form>
             </section>
         </div>
-        <div id="particles-js" class="interactive-bg column is-8">
+        <!-- <div id="particles-js" class="interactive-bg column is-8"></div> -->
+        <div class="column is-8">
+            <figure>
+                <img src="/static/images/Featured_NJC-College-of-the-Nation.jpg" alt="">
+            </figure>
         </div>
     </div>
-
 </body>
 
 </html>

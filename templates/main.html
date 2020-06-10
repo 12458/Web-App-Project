@@ -72,21 +72,59 @@
             {% for place in places %}
             <div class="column is-one-quarter">
                 <a href="{{ url_for('view_location', location=place['Name']) }}">
-                    <div class="box">
-                        <div class="image">
-                            <image src="/static/images/{{ place['image'] }}" />
-                            <!-- <div class="overlay">
-                            <div class="overlay-text">{{ place["Description"] }}</div>
-                        </div> -->
+                    <div class="card">
+                        <header class="card-header">
+                            <p class="card-header-title">
+                                <a href="{{ url_for('view_location', location=place['Name']) }} ">
+                                    {{place["Name"]}}</a>
+                            </p>
+                        </header>
+                        <div class="card-image">
+                            <figure class="image is-16by9">
+                                <img src="/static/images/{{place['image']}}" alt="Placeholder image">
+                            </figure>
                         </div>
-                        <div class="location-info">
-                            <div class="location-name">
-                                <a href="{{ url_for('view_location', location=place['Name']) }} "> {{place["Name"]}}</a>
+                        <div class="card-content">
+                            <div class="field is-grouped is-grouped-multiline">
+                                <div class="control">
+                                    <div class="tags has-addons">
+                                        <span class="tag is-dark">Capacity:</span>
+                                        <span class="tag is-is-info">{{place["Capacity"]}}</span>
+                                    </div>
+                                </div>
+                                <div class="control">
+                                    <div class="tags has-addons">
+                                        <span class="tag is-dark">Availability:</span>
+                                        <span class="tag is-primary">{{place["Availability"]}}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="location-capacity">Capacity: {{place["Capacity"]}}</div>
-                            <div class="location-availability">Availability: {{place["Availability"]}}</div>
                         </div>
                     </div>
+                    <!-- <div class="box">
+                <div class="image">
+                    <image src="/static/images/{{ place['image'] }}" />
+                </div>
+                <div class="location-info">
+                    <div class="location-name">
+                        <a href="{{ url_for('view_location', location=place['Name']) }} "> {{place["Name"]}}</a>
+                    </div>
+                    <div class="field is-grouped is-grouped-multiline">
+                        <div class="control">
+                            <div class="tags has-addons">
+                                <span class="tag is-dark">Capacity:</span>
+                                <span class="tag is-is-info">{{place["Capacity"]}}</span>
+                            </div>
+                        </div>
+                        <div class="control">
+                            <div class="tags has-addons">
+                                <span class="tag is-dark">Availability:</span>
+                                <span class="tag is-primary">{{place["Availability"]}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
                 </a>
             </div>
             {% endfor %}
