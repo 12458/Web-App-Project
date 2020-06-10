@@ -203,7 +203,7 @@ def update_location(location):
     if "image" in request.files:
         image_file = request.files["image"]
         image_file_name = image_file.filename
-        image_file.save("static/images/"+image_file_name)
+        image_file.save(f"static/images/{image_file_name}")
     try:
         con = open_DB("places.db")
         cur = con.cursor()
