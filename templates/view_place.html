@@ -1,66 +1,132 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>View Location</title> 
-        <link rel="stylesheet" type="text/css" href="/static/view_place.css" />
-    </head>
-    <body>
-        <div class="main-page"></div>
-            <div class="menu">
-                <ul>
-                    <li><a href="/home">Home</a></li>
-                    <li><a href="/add_location">Add Location</a></li>
-                    <li><a href="/add_link">Add Link</a></li>
-                </ul>
+
+<head>
+    <title>View Location</title>
+    <!-- Scripts -->
+    <script src="static/js/particles.js"></script>
+    <script src="static/js/main.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
+    <!-- CSS -->
+    <link rel="stylesheet" href="static/login_v2.css">
+    <!-- Bulma -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Icon -->
+    <link rel="icon" href="static/images/njc_logo_square.png" type="image/x-icon" />
+</head>
+
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                <img src="/static/images/njc_logo.png" width="112" height="28">
+            </a>
+
+            <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+                data-target="navbarBasicExample">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/home">
+                    Home
+                </a>
+                <a class="navbar-item" href="/add_location">
+                    Add location
+                </a>
+                <a class="navbar-item" href="/add_link">
+                    Add Link
+                </a>
             </div>
-            <div class="location-page">
-                <div class="location">
-                    <div class="location-image">
-                        <image src="/static/images/{{ place['image'] }}" /> 
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a class="button is-danger" href="{{url_for('logout')}}">
+                            Log out
+                        </a>
                     </div>
-                    <div class="location-info">
-                        <div class="location-name">
-                            <a> {{place["Name"]}}</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="box">
+            <h1 class="title">
+                <p>{{place["Name"]}}</p>
+            </h1>
+            <div class="box">
+                <div class="image is-16by9">
+                    <image src="/static/images/{{ place['image'] }}" />
+                </div>
+            </div>
+            <section class="content">
+                <div class="field is-grouped is-grouped-multiline">
+                    <div class="control">
+                        <div class="tags has-addons">
+                            <span class="tag is-dark">Capacity:</span>
+                            <span class="tag is-is-info">{{place["Capacity"]}}</span>
                         </div>
-                        <div style="display: flex">
-                            <div class="location-label">Capacity: </div>
-                            <div class="location-capacity">{{place["Capacity"]}}</div>
-                        </div>
-                        <div style="display: flex">
-                            <div class="location-label">Availability: </div>
-                            <div class="location-availability">{{place["Availability"]}}</div>
-                        </div>
-                        <div style="display: flex">
-                            <div class="location-label">Description: </div>
-                            <div class="location-description">{{place["Description"]}}</div>
-                        </div>
-                        <div class="buttons"> 
-                            <div class="edit_button">
-                                <a href="{{ url_for('edit_location', location=place['Name']) }}">Edit</a>
-                            </div>
-                            {% if exitFlag != 0 %}
-                            <div class="buttons"> 
-                                <form href="{{ url_for('change_location', location=place['Name']) }}" method="post" enctype = "multipart/form-place">
-                                {% if request.form["submit"] is undefined %}
-                                <select name="exit">
-                                    {% for location in linked_locations %}
-                                        <option value="{{ location['location2'] }}">{{ location["location2"] }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" name="submit" value="submit">Confirm Location</button>
-                                {% endif %}
-                                </form>
-                                {% if request.form["submit"] is not undefined %}
-                                <div class="edit_button">
-                                    <a href="{{ url_for('view_location', location=request.form['exit']) }}">Exit</a>
-                                </div>
-                                {% endif %}
-                            </div>
-                            {% endif %}
+                    </div>
+                    <div class="control">
+                        <div class="tags has-addons">
+                            <span class="tag is-dark">Availability:</span>
+                            <span class="tag is-primary">{{place["Availability"]}}</span>
                         </div>
                     </div>
                 </div>
-            </div> 
+                <article class="message">
+                    <div class="message-header">
+                        <p>Description:</p>
+                    </div>
+                    <div class="message-body">
+                        {{place["Description"]}}
+                    </div>
+                </article>
+
+                <div class="buttons">
+                    <a class="button is-danger is-light"
+                        href="{{ url_for('edit_location', location=place['Name']) }}">Edit</a>
+                    {% if exitFlag != 0 %}
+                    <div>
+                        <form href="{{ url_for('change_location', location=place['Name']) }}" method="post"
+                            enctype="multipart/form-place">
+                            {% if request.form["submit"] is undefined %}
+                            <div class="field has-addons">
+                                <div class="control is-expanded">
+                                    <div class="select is-fullwidth">
+                                        <select name="exit">
+                                            {% for location in linked_locations %}
+                                            <option value="{{ location['location2'] }}">{{ location["location2"] }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="control">
+                                    <button type="submit" name="submit" value="submit" class="button is-primary">Confirm
+                                        Location</button>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </form>
+                        {% if request.form["submit"] is not undefined %}
+                        <a class="button is-success"
+                            href="{{ url_for('view_location', location=request.form['exit']) }}">Exit</a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
         </div>
-    </body>
+    </div>
+</body>
+
 </html>

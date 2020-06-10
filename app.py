@@ -277,11 +277,13 @@ def change_location():
     # return url_for(view_location(target_locaiton))
     # return redirect(url_for(view_location), location=target_locaiton)
 
+
 @app.route('/logout')
 @login_required
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
