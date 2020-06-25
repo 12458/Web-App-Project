@@ -81,13 +81,13 @@
 
             <div id="navbarBasicExample" class="navbar-menu">
                 <div class="navbar-start">
-                    <a class="navbar-item" href="/home">
+                    <a class="navbar-item" href="{{url_for('home')}}">
                         Home
                     </a>
-                    <a class="navbar-item" href="/add_location">
+                    <a class="navbar-item" href="{{url_for('show_add_location_form')}}">
                         Add location
                     </a>
-                    <a class="navbar-item" href="/add_link">
+                    <a class="navbar-item" href="{{url_for('show_add_link')}}">
                         Add Link
                     </a>
                 </div>
@@ -123,7 +123,8 @@
                     <div class="field">
                         <label class="label">Capacity: </label>
                         <div class="control">
-                            <input type="number" class="input" id="capacity" name="capacity" value="{{place['capacity']}}" required>
+                            <input type="number" class="input" id="capacity" name="capacity"
+                                value="{{place['capacity']}}" required>
                         </div>
                     </div>
                     <div class="field">
