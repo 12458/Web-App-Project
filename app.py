@@ -1,23 +1,38 @@
+###########
+# Imports #
+###########
+
 from flask import Flask, render_template, request, redirect, url_for, session, abort
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 import os
 from functools import wraps
+from graphviz import Graph
+from werkzeug.utils import secure_filename
 
-app = Flask("__name__")
+###########
+app = Flask('__name__')
+#################
+# Configuration #
+#################
+
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # limit the maximum allowed payload to 16 megabytes
+db_path = 'database.db'
+DEBUG = True
+UPLOAD_FOLDER = 'static/images/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+#################
+
 # Set secure secret key
-app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_urlsafe(16)
+app.secret_key = os.environ.get('SECRET_KEY') or secrets.token_urlsafe(16)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
-def open_DB(db):
-    connection = sqlite3.connect(db)
+def open_DB():
+    connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row
     return connection
-
-
-DEBUG = True
-
 
 def login_required(func):
     '''
@@ -47,243 +62,284 @@ def login_required(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
         if not 'logged_in' in session:
-            return redirect('/')
+            return redirect(url_for('login'))
         return func(*args, **kwargs)
     return decorated_view
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route("/", methods=["GET", "POST"])
+@app.route('/admin')
+@login_required
+def admin():
+    con = open_DB()
+    cur = con.execute('SELECT * FROM places')
+    rows = cur.fetchall()
+    con.close()
+    username = session['username']
+    return render_template('admin.html', username=username, places=rows, graph=get_link())
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'logged_in' in session:
-        return redirect(url_for('home'))
-    # return render_template("login.html", error="")
-    if request.method == "GET":
-        return render_template("login.html")
+        return redirect(url_for('admin'))
+    # return render_template('login.html', error='')
+    if request.method == 'GET':
+        return render_template('login.html')
     else:
-        con = open_DB('places.db')
+        con = open_DB()
         cur = con.cursor()
-        userNotExist = "This user does not exist. Please input a valid username. "
-        incorrectPass = "Incorrect password. Please try again. "
-        username = request.form["userId"]
-        password = request.form["password"]
-        cur.execute("SELECT id FROM users WHERE id=?", (username,))
+        userNotExist = 'This user does not exist. Please input a valid username.'
+        incorrectPass = 'Incorrect password. Please try again. '
+        username = request.form['userId']
+        password = request.form['password']
+        cur.execute('SELECT id FROM users WHERE id=?', (username,))
         row = cur.fetchall()
         if len(row) == 0:
-            return render_template("login.html", error_user=userNotExist, user_colour="is-danger")
+            return render_template('login.html', error_user=userNotExist, user_colour='is-danger')
         else:
-            cur.execute("SELECT * FROM users WHERE id=?", (username,))
+            cur.execute('SELECT * FROM users WHERE id=?', (username,))
             row = cur.fetchone()
-            print(row["password"])
+            print(row['password'])
             print(password)
-            if check_password_hash(row["password"], password):
+            if check_password_hash(row['password'], password):
                 session['logged_in'] = True
-                return render_template("successLogin.html")
+                session['username'] = username
+                return redirect(url_for('admin'))
             else:
                 print(incorrectPass)
-                return render_template("login.html", error_pass=incorrectPass, pass_color="is-danger")
-    return redirect("/")
+                return render_template('login.html', error_pass=incorrectPass, pass_color='is-danger')
+    return redirect(url_for('login'))
 
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == "GET":
-        return render_template("register.html")
+    if request.method == 'GET':
+        return render_template('register.html')
     else:
-        con = open_DB('places.db')
+        con = open_DB()
         cur = con.cursor()
-        userExist = "This username already exist. Please try a new one. "
-        password_unmatched = "The entered password does not match"
-        username = request.form["userId"]
-        password = request.form["password"]
-        password_confirm = request.form["password_confirm"]
+        userExist = 'This username already exists.'
+        password_unmatched = 'The entered password does not match'
+        username = request.form['userId']
+        password = request.form['password']
+        password_confirm = request.form['password_confirm']
         # Edge case: already handled in HTML
-        if username == "" or password == "":
-            return render_template("login.html", error="Invalid Input. Please try again.")
+        if username == '' or password == '':
+            return render_template('register.html', error='Invalid Input. Please try again.')
         if password != password_confirm:
-            return render_template("login.html", error_pass=password_unmatched)
+            return render_template('register.html', error_pass=password_unmatched)
         if DEBUG == True:
             print(username)
             print(password)
         try:
-            cur.execute("SELECT id FROM users WHERE id=?", (username,))
+            cur.execute('SELECT id FROM users WHERE id=?', (username,))
             row = cur.fetchall()
             if len(row) == 0:
                 try:
-                    cur.execute("INSERT INTO users(id, password) VALUES(?,?)",
+                    cur.execute('INSERT INTO users(id, password) VALUES(?,?)',
                                 (username, generate_password_hash(password)))
                     con.commit()
                     return redirect(url_for('login'))
                 except Exception as e:
                     print(e)
             else:
-                return render_template("register.html", error_user=userExist, user_colour="is-success")
+                return render_template('register.html', error_user=userExist, user_colour='is-success')
         except Exception as e:
             print(e)
 
 
-@ app.route("/home")
-@login_required
+@ app.route('/')
 def home():
-    con = open_DB('places.db')
-    cur = con.execute("SELECT * FROM places")
+    con = open_DB()
+    cur = con.execute('SELECT * FROM places')
     rows = cur.fetchall()
-    return render_template("main.html", places=rows)
+    return render_template('main.html', places=rows)
 
 
-@ app.route("/add_location")
+@ app.route('/add_location')
 @login_required
 def show_add_location_form():
-    return render_template("add_place.html")
+    return render_template('add_place.html')
 
 
-@ app.route("/submit", methods=["POST"])
+@ app.route('/submit', methods=['POST'])
 @login_required
 def submit_add_location():
-    name = request.form["name"]
-    description = request.form["description"]
-    capacity = request.form["capacity"]
-    availability = request.form["availability"]
-    con = open_DB("places.db")
-    if "image" in request.files:
-        image_file = request.files["image"]
-        image_file_name = image_file.filename
-        image_file.save("static/images/"+image_file_name)
-        try:
-            con.execute("INSERT INTO places(Name, Description, Capacity, Availability, Image) VALUES (?,?,?,?,?)",
-                        (name, description, capacity, availability, image_file_name))
-        except Exception as e:
-            print(str(e))
+    name = request.form['name']
+    description = request.form['description']
+    capacity = request.form['capacity']
+    availability = request.form['availability']
+    con = open_DB()
+    if 'image' in request.files:
+        image_file = request.files['image']
+        if image_file and allowed_file(image_file.filename):
+            image_file_name = secure_filename(image_file.filename)
+            image_file.save(app.config['UPLOAD_FOLDER'] + image_file_name)
+            try:
+                con.execute('INSERT INTO places(Name, Description, Capacity, Availability, Image) VALUES (?,?,?,?,?)',
+                            (name, description, capacity, availability, image_file_name))
+            except Exception as e:
+                print(str(e))
     else:
         try:
-            con.execute("INSERT INTO places(Name, Description, Capacity, Availability) VALUES (?,?,?,?)",
+            con.execute('INSERT INTO places(Name, Description, Capacity, Availability) VALUES (?,?,?,?)',
                         (name, description, capacity, availability))
         except Exception as e:
             print(str(e))
     con.commit()
     con.close()
-    return redirect("/home")
+    return redirect(url_for('home'))
 
 
-@ app.route("/view_location/<location>", methods=["GET", "POST"])
-@login_required
+@ app.route('/view_location/<location>', methods=['GET', 'POST'])
 def view_location(location):
     linked_locations = []
     try:
-        con = open_DB("places.db")
+        con = open_DB()
         cur = con.cursor()
-        cur.execute("SELECT * FROM places where name=?", (location,))
+        cur.execute('SELECT * FROM places WHERE name=?', (location,))
         row = cur.fetchone()
-        cur.execute("SELECT location2 from link where location1=?", (location,))
+        cur.execute('SELECT location2 FROM link WHERE location1=?', (location,))
         linked_locations = cur.fetchall()
         con.close()
     except Exception as e:
         print(str(e))
     exitFlag = len(linked_locations)
-    return render_template("view_place.html", place=row, linked_locations=linked_locations, exitFlag=exitFlag)
+    return render_template('view_place.html', place=row, linked_locations=linked_locations, exitFlag=exitFlag)
 
 
-@ app.route("/edit/<location>", methods=["GET"])
+@ app.route('/edit/<location>', methods=['GET'])
 @login_required
 def edit_location(location):
     try:
-        con = open_DB("places.db")
+        con = open_DB()
         cur = con.cursor()
-        cur.execute("SELECT * FROM places where name=?", (location,))
+        cur.execute('SELECT * FROM places where name=?', (location,))
         row = cur.fetchone()
         con.close()
     except Exception as e:
         print(str(e))
-    return render_template("edit_place.html", place=row)
+    return render_template('edit_place.html', place=row)
 
 
-@ app.route("/edit/<location>", methods=["POST"])
+@ app.route('/edit/<location>', methods=['POST'])
 @login_required
 def update_location(location):
-    image_file_name = ""
-    if "image" in request.files:
-        image_file = request.files["image"]
-        image_file_name = image_file.filename
-        image_file.save(f"static/images/{image_file_name}")
+    image_file_name = ''
+    if 'image' in request.files:
+        image_file = request.files['image']
+        if image_file and allowed_file(image_file.filename):
+            image_file_name = secure_filename(image_file.filename)
+            image_file.save(app.config['UPLOAD_FOLDER'] + image_file_name)
     try:
-        con = open_DB("places.db")
+        con = open_DB()
         cur = con.cursor()
-        if request.form["submit"] == "update" and image_file_name == "":
-            cur.execute("UPDATE places set name=?, description=?, capacity=?, availability=? where name=?",
-                        (request.form["name"], request.form["description"], request.form["capacity"],
-                         request.form["availability"], request.form["name"]))
-        elif request.form["submit"] == "update" and image_file_name != "":
-            cur.execute("UPDATE places set name=?, description=?, capacity=?, availability=?, image=? where name=?)",
-                        (request.form["name"], request.form["description"], request.form["capacity"],
-                         request.form["availability"], request.form["image"], request.form["name"]))
-        elif request.form["submit"] == "delete":
+        if request.form['submit'] == 'update' and image_file_name == '':
+            cur.execute('UPDATE places SET name=?, description=?, capacity=?, availability=? WHERE name=?',
+                        (request.form['name'], request.form['description'], request.form['capacity'], request.form['availability'], request.form['name']))
+        elif request.form['submit'] == 'update' and image_file_name != '':
+            cur.execute('UPDATE places SET name=?, description=?, capacity=?, availability=?, image=? where name=?)',
+                        (request.form['name'], request.form['description'], request.form['capacity'], request.form['availability'], request.form['image'], request.form['name']))
+        elif request.form['submit'] == 'delete':
             cur.execute(
-                "DELETE FROM link WHERE location1 = ? OR location2 = ?", (location, location))
-            cur.execute("DELETE FROM places where name=?", (location,))
-            msg = "Location Deleted. "
+                'DELETE FROM link WHERE location1 = ? OR location2 = ?', (location, location))
+            cur.execute('DELETE FROM places where name=?', (location,))
+            msg = 'Location Deleted. '
         con.commit()
         con.close()
     except Exception as e:
         print(str(e))
     try:
-        con = open_DB("places.db")
+        con = open_DB()
         cur = con.cursor()
-        cur.execute("SELECT * FROM places where name=?", (location,))
+        cur.execute('SELECT * FROM places WHERE name=?', (location,))
         row = cur.fetchone()
         con.close()
     except Exception as e:
         print(str(e))
-    if request.form["submit"] == "delete":
-        return redirect("/home")
-    return render_template("view_place.html", place=row)
+    if request.form['submit'] == 'delete':
+        return redirect('/home')
+    return render_template('view_place.html', place=row)
 
 
-@ app.route("/add_link", methods=["GET"])
+@ app.route('/add_link', methods=['GET'])
 @login_required
 def show_add_link():
     try:
-        con = open_DB("places.db")
+        con = open_DB()
         cur = con.cursor()
-        cur.execute("SELECT name FROM places")
+        cur.execute('SELECT name FROM places')
         location_list = cur.fetchall()
         con.commit()
         con.close()
     except Exception as e:
         print(str(e))
-    return render_template("add_link.html", location_list=location_list)
+    return render_template('add_link.html', location_list=location_list)
 
 
-@ app.route("/add_link", methods=["POST"])
+@ app.route('/add_link', methods=['POST'])
 @login_required
 def add_link():
     try:
-        con = open_DB("places.db")
+        con = open_DB()
         cur = con.cursor()
-        if request.form["submit"] == "update":
-            cur.execute("INSERT INTO link (location1, location2) VALUES (?,?)",
-                        (request.form["location_1"], request.form["location_2"]))
-            cur.execute("INSERT INTO link (location1, location2) VALUES (?,?)",
-                        (request.form["location_2"], request.form["location_1"]))
+        if request.form['submit'] == 'update':
+            cur.execute('INSERT INTO link (location1, location2) VALUES (?,?)',
+                        (request.form['location_1'], request.form['location_2']))
+            cur.execute('INSERT INTO link (location1, location2) VALUES (?,?)',
+                        (request.form['location_2'], request.form['location_1']))
         con.commit()
         con.close()
     except Exception as e:
         print(str(e))
-    return redirect("/home")
-
-
-@ app.route("/view_location/<location>", methods=["GET", "POST"])
-@login_required
-def change_location():
-    return 0
-    # return url_for(view_location(target_locaiton))
-    # return redirect(url_for(view_location), location=target_locaiton)
-
+    return redirect(url_for('admin'))
 
 @app.route('/logout')
 @login_required
 def logout():
+    '''
+    Logout the current user
+    '''
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for('home'))
 
 
-if __name__ == "__main__":
+def get_link():
+    try:
+        con = open_DB()
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute('SELECT * FROM link')
+        edges_raw = cur.fetchall()
+        cur.execute('SELECT Name FROM places')
+        nodes_raw = cur.fetchall()
+        con.close()
+    except Exception as e:
+        print(str(e))
+    return render_graph(node=nodes_raw, edge=edges_raw)
+
+
+def render_graph(**data):
+    '''
+    Uses Graphviz to create a visual representation of the links between places
+    Takes in Arbitrary Keyword Arguments, **kwargs
+    Expects 2 parameters: Node and Edge
+    Node should be a 1D list --> ['A','B','C']
+    Edge should be a nested list --> [['A','B'],['B','C']]
+    Returns SVG code: Put in render_template directly
+    '''
+    graph = Graph('Places', engine='neato')
+    for node in data['node']:
+        graph.node(str(node[0]))
+    for edge in data['edge']:
+        graph.edge(str(edge['Location1']), str(edge['Location2']))
+        print(f'Connected {str(edge["Location1"])} <--> {str(edge["Location2"])}')
+    chart_output = graph.pipe(format='svg').decode('utf-8')
+    return chart_output
+
+
+if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Administration Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
+    <!-- CSS -->
+    <link rel="stylesheet" href="static/login_v2.css">
+    <!-- Bulma -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <meta charset="utf-8">
+    <!-- Icon -->
+    <link rel="icon" href="static/images/njc_logo_square.png" type="image/x-icon" />
+    <style>
+        svg {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- START NAV -->
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                <img src="/static/images/njc_logo.png" width="112" height="28">
+            </a>
+
+            <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+                data-target="navbarBasicExample">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/home">
+                    Home
+                </a>
+            </div>
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a class="button is-danger" href="{{url_for('logout')}}">
+                            Log out
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- END NAV -->
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3 ">
+                <aside class="menu is-hidden-mobile">
+                    <p class="menu-label">
+                        Administration
+                    </p>
+                    <ul class="menu-list">
+                        <li><a href="{{url_for('show_add_location_form')}}">Add Location</a></li>
+                        <li><a href="{{url_for('show_add_link')}}">Add Link</a></li>
+                    </ul>
+                </aside>
+                <aside>
+                    <div class="container">
+                        <div class="card">
+                            <header class="card-header">
+                                <p class="card-header-title">
+                                    Graphical View
+                                </p>
+                            </header>
+                            <div class="card-content">
+                                <div class="content">
+                                    {{ graph|safe}}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </aside>
+            </div>
+            <div class="column is-9">
+                <section class="hero is-info welcome is-small">
+                    <div class="hero-body">
+                        <div class="container">
+                            <h1 class="title">
+                                Hello, {{ username }}.
+                            </h1>
+                            <h2 class="subtitle">
+                                I hope you are having a great day!
+                            </h2>
+                        </div>
+                    </div>
+                </section>
+                <div class="container">
+                    <div class="columns is-multiline">
+                        {% for place in places %}
+                        <div class="column is-one-quarter">
+                            <a href="{{ url_for('view_location', location=place['Name']) }}">
+                                <div class="card">
+                                    <header class="card-header">
+                                        <p class="card-header-title">
+                                            <a href="{{ url_for('view_location', location=place['Name']) }} ">
+                                                {{place["Name"]}}</a>
+                                        </p>
+                                    </header>
+                                    <div class="card-image">
+                                        <figure class="image is-16by9">
+                                            <img src="/static/images/{{place['image']}}" alt="Placeholder image">
+                                        </figure>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="field is-grouped is-grouped-multiline">
+                                            <div class="control">
+                                                <div class="tags has-addons">
+                                                    <span class="tag is-dark">Capacity:</span>
+                                                    <span class="tag is-is-info">{{place["Capacity"]}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="control">
+                                                <div class="tags has-addons">
+                                                    <span class="tag is-dark">Availability:</span>
+                                                    <span class="tag is-primary">{{place["Availability"]}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
