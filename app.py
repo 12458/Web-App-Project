@@ -2,7 +2,7 @@
 # Imports #
 ###########
 
-from flask import Flask, render_template, request, redirect, url_for, session, abort
+from flask import Flask, render_template, request, redirect, url_for, session, abort, flash
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
@@ -85,70 +85,27 @@ def admin():
 def login():
     if 'logged_in' in session:
         return redirect(url_for('admin'))
-    # return render_template('login.html', error='')
-    if request.method == 'GET':
-        return render_template('login.html')
-    else:
+    if request.method == 'POST':
         con = open_DB()
         cur = con.cursor()
-        userNotExist = 'This user does not exist. Please input a valid username.'
+        userNotExist = 'This username does not exist'
         incorrectPass = 'Incorrect password. Please try again. '
         username = request.form['userId']
         password = request.form['password']
         cur.execute('SELECT id FROM users WHERE id=?', (username,))
         row = cur.fetchall()
         if len(row) == 0:
-            return render_template('login.html', error_user=userNotExist, user_colour='is-danger')
+            flash(userNotExist, 'user_error')
         else:
             cur.execute('SELECT * FROM users WHERE id=?', (username,))
             row = cur.fetchone()
-            print(row['password'])
-            print(password)
             if check_password_hash(row['password'], password):
                 session['logged_in'] = True
                 session['username'] = username
                 return redirect(url_for('admin'))
             else:
-                print(incorrectPass)
-                return render_template('login.html', error_pass=incorrectPass, pass_color='is-danger')
-    return redirect(url_for('login'))
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'GET':
-        return render_template('register.html')
-    else:
-        con = open_DB()
-        cur = con.cursor()
-        userExist = 'This username already exists.'
-        password_unmatched = 'The entered password does not match'
-        username = request.form['userId']
-        password = request.form['password']
-        password_confirm = request.form['password_confirm']
-        # Edge case: already handled in HTML
-        if username == '' or password == '':
-            return render_template('register.html', error='Invalid Input. Please try again.')
-        if password != password_confirm:
-            return render_template('register.html', error_pass=password_unmatched)
-        if DEBUG == True:
-            print(username)
-            print(password)
-        try:
-            cur.execute('SELECT id FROM users WHERE id=?', (username,))
-            row = cur.fetchall()
-            if len(row) == 0:
-                try:
-                    cur.execute('INSERT INTO users(id, password) VALUES(?,?)',
-                                (username, generate_password_hash(password)))
-                    con.commit()
-                    return redirect(url_for('login'))
-                except Exception as e:
-                    print(e)
-            else:
-                return render_template('register.html', error_user=userExist, user_colour='is-success')
-        except Exception as e:
-            print(e)
+                flash(incorrectPass, 'pass_error')
+    return render_template('login.html')
 
 
 @ app.route('/')
@@ -157,7 +114,6 @@ def home():
     cur = con.execute('SELECT * FROM places')
     rows = cur.fetchall()
     return render_template('main.html', places=rows)
-
 
 @ app.route('/add_location')
 @login_required

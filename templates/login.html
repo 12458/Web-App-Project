@@ -29,11 +29,13 @@
 </head>
 
 <body>
-    {% if error %}
+    {% with errors = get_flashed_messages(category_filter=["error"]) %}
+    {% if errors %}
     <div class="notification is-danger is-pulled-right">
-        {{ error }}
+        {{ errors }}
     </div>
     {% endif %}
+    {% endwith %}
     <div class="columns is-vcentered is-gapless">
         <div class="login column is-4 ">
             <section class="section">
@@ -48,7 +50,11 @@
                             <span class="icon is-small is-right">
                                 <i class="fa fa-user"></i>
                             </span>
-                            <p class="help {{ user_color }}">{{ error_user }}</p>
+                            {% with user_error = get_flashed_messages(category_filter=['user_error']) %}
+                            {% if user_error %}
+                            <p class="help is-danger">{{ user_error[0] }}</p>
+                            {% endif %}
+                            {% endwith %}
                         </div>
                     </div>
 
@@ -59,20 +65,21 @@
                             <span class="icon is-small is-right">
                                 <i class="fa fa-key"></i>
                             </span>
-                            <p class="help {{ pass_color }}">{{ error_pass }}</p>
+                            {% with pass_error = get_flashed_messages(category_filter=['pass_error']) %}
+                            {% if pass_error %}
+                            <p class="help is-danger">{{ pass_error[0] }}</p>
+                            {% endif %}
+                            {% endwith %}
                         </div>
                     </div>
                     <div class="has-text-centered">
+                        <a href="{{url_for('home')}}" class="button is-light">Home</a>
                         <button type="submit" name="submit"
                             class="button is-vcentered is-primary is-outlined">Login</button>
-                    </div>
-                    <div class="has-text-centered">
-                        <a href="register"> Don't you have an account? Sign up now!</a>
                     </div>
                 </form>
             </section>
         </div>
-        <!-- <div id="particles-js" class="interactive-bg column is-8"></div> -->
         <div class="column is-8">
             <figure>
                 <img src="/static/images/Featured_NJC-College-of-the-Nation.jpg" alt="">
