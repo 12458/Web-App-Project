@@ -20,6 +20,7 @@
 
 <body>
     <div>
+        <!-- START NAV -->
         <nav class="navbar" role="navigation" aria-label="main navigation">
             <div class="navbar-brand">
                 <a class="navbar-item" href="/">
@@ -39,25 +40,36 @@
                     <a class="navbar-item" href="{{url_for('home')}}">
                         Home
                     </a>
+                    {% if session['logged_in'] %}
                     <a class="navbar-item" href="{{url_for('show_add_location_form')}}">
                         Add location
                     </a>
                     <a class="navbar-item" href="{{url_for('show_add_link')}}">
                         Add Link
                     </a>
+                    {% endif %}
                 </div>
 
                 <div class="navbar-end">
                     <div class="navbar-item">
+                        {% if session['logged_in'] %}
                         <div class="buttons">
-                            <a class="button is-danger" href="{{url_for('logout')}}">
-                                Log out
+                            <a class="button is-outlined is-danger" href="{{url_for('logout')}}">
+                                Logout
                             </a>
                         </div>
+                        {% else %}
+                        <div class="buttons">
+                            <a class="button is-outlined is-primary" href="{{url_for('login')}}">
+                                Admin Login
+                            </a>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </nav>
+        <!-- END NAV -->
         <section class="container">
             <div class="box">
                 <form action="/submit" method="post" enctype="multipart/form-data">
