@@ -16,7 +16,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Icon -->
     <link rel="icon" href="static/images/njc_logo_square.png" type="image/x-icon" />
-    {% extends 'analytics.html' %} 
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-172950592-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-172950592-1');
+    </script>
 </head>
 
 <body>
