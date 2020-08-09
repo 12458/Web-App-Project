@@ -23,6 +23,16 @@
 
         gtag('config', 'UA-172950592-1');
     </script>
+    <!-- <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        .content-wrapper {
+            flex: 1;
+        }
+    </style> -->
     {% block head %}
     {% endblock %}
 </head>
@@ -79,11 +89,11 @@
         </div>
     </nav>
     {% endblock %}
-    <div class="container">
+    <div class="container content-wrapper">
         {% block content %}
         {% endblock %}
     </div>
-    {% endblock %}
+
     {% block footer %}
     <footer class="footer">
         <div class="content container">
@@ -109,6 +119,7 @@
         </div>
         </div>
     </footer>
+    {% endblock %}
     {% endblock %}
 </body>
 <script>

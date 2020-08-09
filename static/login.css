@@ -1,77 +1,39 @@
-body{
-    margin: 0;
-    padding: 0; 
-    background: #E5E5E5; 
+.interactive-bg {
+  height: 100vh;
+  background-color: #00d1b2;
+  -webkit-box-shadow: inset 24px 4px 64px -24px rgba(71, 71, 71, 1);
+  -moz-box-shadow: inset 24px 4px 64px -24px rgba(71, 71, 71, 1);
+  box-shadow: inset 24px 4px 64px -24px rgba(71, 71, 71, 1);
+  padding: 0px;
 }
-.welcome_msg {
-    margin: auto; 
-    text-align: center; 
-    background: #8DB2D8; 
-    padding: 1em;  
-}
-
-.msg1 {
-    font-size: 25px; 
-    color: white;
-    font-family: Arial; 
-    font-weight: bold; 
+@media (max-width: 769px) {
+  .interactive-bg {
+    display: none;
+  }
 }
 
-.msg2 {
-    font-size: 20px; 
-    color: white;
-    font-family: Arial; 
-    font-style: italic; 
-}
-
-.error {
-    text-align: center; 
-}
-
-.errorMsg {
-    margin: auto; 
-    padding: 10px; 
-    color: black; 
-    font-family: Arial; 
-    font-weight: bold; 
-    background: #CCCCCC;
-}
-
-.login_form {
-    margin: auto; 
-    padding: 2em; 
- 
-}
-
-.userInfoText { 
-    font-family: Arial; 
-    font-size: 15px; 
-    padding: 5px;
-    background: #CCCCCC; 
-    margin: 5px 0; 
-    width: fit-content;
-     
+.input {
+  border-radius: 50px;
 }
 
 .button {
-    margin: 10px 5px 10px 0; 
-    font-size: 15px; 
-    font-weight: bold; 
-    color: white; 
-    border-radius: 5px;
-    background: #8DB2D8; 
-    padding: 5px 5px; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+  min-width: 150px;
 }
 
-input {
-    font-size: 15px; 
-    margin: 5px;
+.login-logo {
+  margin: 0 auto;
+  margin-bottom: 50px;
+  max-height: 100px;
 }
 
-.userId {
-    display: flex; 
+.columns {
+  margin: 0px;
+  display: flex;
+  height: 100vh;
 }
 
-.password {
-    display: flex; 
+img {
+  height: 100vh;
 }
