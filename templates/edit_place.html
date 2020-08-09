@@ -1,212 +1,81 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>Edit Location</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
-    <!-- CSS -->
-    <link rel="stylesheet" href="static/login_v2.css">
-    <!-- Bulma -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Icon -->
-    <link rel="icon" href="static/images/njc_logo_square.png" type="image/x-icon" />
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-172950592-1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'UA-172950592-1');
-    </script>
-</head>
-<!-- 
-<body>
-    <div class="main-page">
-        <div class="menu">
-            <ul>
-                <li><a href="/home">Home</a></li>
-                <li><a href="/add_location">Add Location</a></li>
-                <li><a href="/add_link">Add Link</a></li>
-            </ul>
+{% extends "base.html" %}
+{% block title %}Edit {{Location}}{% endblock %}
+{% block content %}
+<div class="box">
+    <form action="{{ url_for('update_location', location=place['name']) }}" method="post" enctype="multipart/form-data">
+        <div class="field">
+            <label class="label">Location Name: </label>
+            <div class="control">
+                <input type="text" class="input" id="name" name="name" value="{{place['name']}}" required>
+            </div>
         </div>
-        <div class="form-page">
-            <form action="{{ url_for('update_location', location=place['name']) }}" method="post"
-                enctype="multipart/form-place">
-                <div>
-                    <label for="name">Location Name: </label>
-                    <input type="text" id="name" name="name" required="required" value="{{place['name']}}">
-                </div>
-                <div>
-                    <label for="description">Description: </label>
-                    <textarea type="text" id="description" name="description"
-                        required="required">"{{place['description']}}"</textarea>
-                </div>
-                <div>
-                    <label for="capacity">Capacity: </label>
-                    <input type="number" id="capacity" name="capacity" required="required"
-                        value="{{place['capacity']}}">
-                </div>
-                <div>
-                    <label for="availability">Availability: </label>
-                    <select name="availability" required="required">
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="inmage">Product image:</label>
-                    <input type="file" id="image" name="image">
-                    <image src="/static/images/{{ place['image'] }}"
-                        style="width:100px;display:block;margin:auto auto" />
-                </div>
-                <div class="button">
-                    <button type="submit" name="submit" value="update">Update Location</button>
-                    <button type="submit" name="submit" value="delete">Delete Location</button>
-                </div>
-            </form>
+        <div class="field">
+            <label class="label">Description: </label>
+            <div class="control">
+                <textarea id="description" name="description" class="textarea"
+                    required>"{{place['description']}}"</textarea>
+            </div>
         </div>
-    </div>
-</body> -->
-
-<body>
-    <div>
-        <!-- START NAV -->
-        <nav class="navbar" role="navigation" aria-label="main navigation">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="/">
-                    <img src="/static/images/njc_logo.png" width="112" height="28">
-                </a>
-
-                <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
-                    data-target="navbarBasicExample">
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                </a>
+        <div class="field">
+            <label class="label">Capacity: </label>
+            <div class="control">
+                <input type="number" class="input" id="capacity" name="capacity" value="{{place['capacity']}}" required>
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Availability: </label>
+            <div class="control">
+                <label class="radio">
+                    <input type="radio" name="availability">
+                    Yes
+                </label>
+                <label class="radio">
+                    <input type="radio" name="availability">
+                    No
+                </label>
+            </div>
+        </div>
+        <div class="field">
+            <figure class="image">
+                <image src="/static/images/{{ place['image'] }}" style="width:100px;display:block;margin:auto auto" />
+            </figure>
+            <div id="image" class="file has-name">
+                <label class="file-label">
+                    <input class="file-input" type="file" name="image">
+                    <span class="file-cta">
+                        <span class="file-icon">
+                            <i class="fas fa-upload"></i>
+                        </span>
+                        <span class="file-label">
+                            Location Image
+                        </span>
+                    </span>
+                    <span class="file-name">
+                        No image uploaded
+                    </span>
+                </label>
             </div>
 
-            <div id="navbarBasicExample" class="navbar-menu">
-                <div class="navbar-start">
-                    <a class="navbar-item" href="{{url_for('home')}}">
-                        Home
-                    </a>
-                    {% if session['logged_in'] %}
-                    <a class="navbar-item" href="{{url_for('show_add_location_form')}}">
-                        Add location
-                    </a>
-                    <a class="navbar-item" href="{{url_for('show_add_link')}}">
-                        Add Link
-                    </a>
-                    {% endif %}
-                </div>
-
-                <div class="navbar-end">
-                    <div class="navbar-item">
-                        {% if session['logged_in'] %}
-                        <div class="buttons">
-                            <a class="button is-outlined is-danger" href="{{url_for('logout')}}">
-                                Logout
-                            </a>
-                        </div>
-                        {% else %}
-                        <div class="buttons">
-                            <a class="button is-outlined is-primary" href="{{url_for('login')}}">
-                                Admin Login
-                            </a>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
+            <script>
+                const fileInput = document.querySelector('#image input[type=file]');
+                fileInput.onchange = () => {
+                    if (fileInput.files.length > 0) {
+                        const fileName = document.querySelector('#image .file-name');
+                        fileName.textContent = fileInput.files[0].name;
+                    }
+                }
+            </script>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <button class="button is-success" type="submit" name="submit" value="update">Update
+                    Location</button>
             </div>
-        </nav>
-        <!-- END NAV -->
-        <section class="container">
-            <div class="box">
-                <form action="{{ url_for('update_location', location=place['name']) }}" method="post"
-                    enctype="multipart/form-data">
-                    <div class="field">
-                        <label class="label">Location Name: </label>
-                        <div class="control">
-                            <input type="text" class="input" id="name" name="name" value="{{place['name']}}" required>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Description: </label>
-                        <div class="control">
-                            <textarea id="description" name="description" class="textarea"
-                                required>"{{place['description']}}"</textarea>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Capacity: </label>
-                        <div class="control">
-                            <input type="number" class="input" id="capacity" name="capacity"
-                                value="{{place['capacity']}}" required>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Availability: </label>
-                        <div class="control">
-                            <label class="radio">
-                                <input type="radio" name="availability">
-                                Yes
-                            </label>
-                            <label class="radio">
-                                <input type="radio" name="availability">
-                                No
-                            </label>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <figure class="image">
-                            <image src="/static/images/{{ place['image'] }}"
-                                style="width:100px;display:block;margin:auto auto" />
-                        </figure>
-                        <div id="image" class="file has-name">
-                            <label class="file-label">
-                                <input class="file-input" type="file" name="image">
-                                <span class="file-cta">
-                                    <span class="file-icon">
-                                        <i class="fas fa-upload"></i>
-                                    </span>
-                                    <span class="file-label">
-                                        Location Image
-                                    </span>
-                                </span>
-                                <span class="file-name">
-                                    No image uploaded
-                                </span>
-                            </label>
-                        </div>
-
-                        <script>
-                            const fileInput = document.querySelector('#image input[type=file]');
-                            fileInput.onchange = () => {
-                                if (fileInput.files.length > 0) {
-                                    const fileName = document.querySelector('#image .file-name');
-                                    fileName.textContent = fileInput.files[0].name;
-                                }
-                            }
-                        </script>
-                    </div>
-                    <div class="field is-grouped">
-                        <div class="control">
-                            <button class="button is-success" type="submit" name="submit" value="update">Update
-                                Location</button>
-                        </div>
-                        <div class="control">
-                            <button class="button is-danger is-light" name="submit" value="delete">Delete
-                                Location</button>
-                        </div>
-                    </div>
-                </form>
+            <div class="control">
+                <button class="button is-danger is-light" name="submit" value="delete">Delete
+                    Location</button>
             </div>
-        </section>
-    </div>
-</body>
-
-</html>
+        </div>
+    </form>
+</div>
+{% endblock %}

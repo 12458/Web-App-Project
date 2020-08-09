@@ -1,126 +1,52 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
+{% block title %}Main Page{% endblock %}
+{% block head %}
+<style>
+    .column {
+        display: flex;
+    }
 
-<head>
-    <title>Main Page</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
-    <!-- CSS -->
-    <link rel="stylesheet" href="static/login_v2.css">
-    <!-- Bulma -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Icon -->
-    <link rel="icon" href="static/images/njc_logo_square.png" type="image/x-icon" />
-    <style>
-        .column {
-            display: flex;
-        }
-
-        .columns {
-            justify-content: center;
-        }
-    </style>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-172950592-1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'UA-172950592-1');
-    </script>
-</head>
-
-<body>
-    <nav class="navbar" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="/">
-                <img src="/static/images/njc_logo.png" width="112" height="28">
-            </a>
-
-            <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
-                data-target="navbarBasicExample">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
-        </div>
-
-        <div id="navbarBasicExample" class="navbar-menu">
-            <div class="navbar-start">
-                <a class="navbar-item" href="{{url_for('home')}}">
-                    Home
-                </a>
-                {% if session['logged_in'] %}
-                <a class="navbar-item" href="{{url_for('show_add_location_form')}}">
-                    Add location
-                </a>
-                <a class="navbar-item" href="{{url_for('show_add_link')}}">
-                    Add Link
-                </a>
-                {% endif %}
-            </div>
-
-            <div class="navbar-end">
-                <div class="navbar-item">
-                    {% if session['logged_in'] %}
-                    <div class="buttons">
-                        <a class="button is-outlined is-danger" href="{{url_for('logout')}}">
-                            Logout
-                        </a>
-                    </div>
-                    {% else %}
-                    <div class="buttons">
-                        <a class="button is-outlined is-primary" href="{{url_for('login')}}">
-                            Admin Login
-                        </a>
-                    </div>
-                    {% endif %}
+    .columns {
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="columns is-multiline">
+    {% for place in places %}
+    <div class="column is-one-quarter">
+        <a href="{{ url_for('view_location', location=place['Name']) }}">
+            <div class="card">
+                <header class="card-header">
+                    <p class="card-header-title">
+                        <a href="{{ url_for('view_location', location=place['Name']) }} ">
+                            {{place["Name"]}}</a>
+                    </p>
+                </header>
+                <div class="card-image">
+                    <figure class="image is-16by9">
+                        <img src="/static/images/{{place['image']}}" alt="Placeholder image">
+                    </figure>
                 </div>
-            </div>
-        </div>
-    </nav>
-    <div class="container">
-        <div class="columns is-multiline">
-            {% for place in places %}
-            <div class="column is-one-quarter">
-                <a href="{{ url_for('view_location', location=place['Name']) }}">
-                    <div class="card">
-                        <header class="card-header">
-                            <p class="card-header-title">
-                                <a href="{{ url_for('view_location', location=place['Name']) }} ">
-                                    {{place["Name"]}}</a>
-                            </p>
-                        </header>
-                        <div class="card-image">
-                            <figure class="image is-16by9">
-                                <img src="/static/images/{{place['image']}}" alt="Placeholder image">
-                            </figure>
+                <div class="card-content">
+                    <div class="field is-grouped is-grouped-multiline">
+                        <div class="control">
+                            <div class="tags has-addons">
+                                <span class="tag is-dark">Capacity:</span>
+                                <span class="tag is-is-info">{{place["Capacity"]}}</span>
+                            </div>
                         </div>
-                        <div class="card-content">
-                            <div class="field is-grouped is-grouped-multiline">
-                                <div class="control">
-                                    <div class="tags has-addons">
-                                        <span class="tag is-dark">Capacity:</span>
-                                        <span class="tag is-is-info">{{place["Capacity"]}}</span>
-                                    </div>
-                                </div>
-                                <div class="control">
-                                    <div class="tags has-addons">
-                                        <span class="tag is-dark">Avaliable:</span>
-                                        <span class="tag is-primary">{{place["Availability"]}}</span>
-                                    </div>
-                                </div>
+                        <div class="control">
+                            <div class="tags has-addons">
+                                <span class="tag is-dark">Available:</span>
+                                <span class="tag is-primary">{{place["Availability"]}}</span>
                             </div>
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
-            {% endfor %}
-        </div>
+        </a>
     </div>
-</body>
-
-</html>
+    {% endfor %}
+</div>
+{% endblock %}

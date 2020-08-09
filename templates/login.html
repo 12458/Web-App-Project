@@ -1,100 +1,77 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block head %}
+<style>
+    img {
+        height: 100vh;
+    }
 
-<head>
-    <title>Log In</title>
-    <!-- Scripts -->
-    <!-- <script src="static/js/particles.js"></script>
-    <script src="static/js/main.js"></script> -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
-    <!-- CSS -->
-    <link rel="stylesheet" href="static/login_v2.css">
-    <!-- Bulma -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Icon -->
-    <link rel="icon" href="/static/images/njc_logo_square.png" type="image/x-icon" />
-    <style>
-        img {
-            height: 100vh;
-        }
+    .columns {
+        display: flex;
+        height: 100vh;
+    }
+</style>
+{% endblock %}
 
-        .columns {
-            display: flex;
-            height: 100vh;
-        }
-    </style>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-172950592-1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
+{% block navbar %}
+{% endblock %}
 
-        gtag('config', 'UA-172950592-1');
-    </script>
-</head>
-
-<body>
-    {% with errors = get_flashed_messages(category_filter=["error"]) %}
-    {% if errors %}
-    <div class="notification is-danger is-pulled-right">
-        {{ errors }}
-    </div>
-    {% endif %}
-    {% endwith %}
-    <div class="columns is-vcentered is-gapless">
-        <div class="login column is-4 ">
-            <section class="section">
-                <div class="has-text-centered">
-                    <img class="login-logo" src="/static/images/njc_logo.png">
+{% block body %}
+{% with errors = get_flashed_messages(category_filter=["error"]) %}
+{% if errors %}
+<div class="notification is-danger is-pulled-right">
+    {{ errors }}
+</div>
+{% endif %}
+{% endwith %}
+<div class="columns is-vcentered is-gapless">
+    <div class="login column is-4 ">
+        <section class="section">
+            <div class="has-text-centered">
+                <img class="login-logo" src="/static/images/njc_logo.png">
+            </div>
+            <form method="post" enctype="multipart/form-place">
+                <div class="field">
+                    <label class="label">Username</label>
+                    <div class="control has-icons-right">
+                        <input class="input" type="text" name="userId" placeholder="Username" autofocus required>
+                        <span class="icon is-small is-right">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        {% with user_error = get_flashed_messages(category_filter=['user_error']) %}
+                        {% if user_error %}
+                        <p class="help is-danger">{{ user_error[0] }}</p>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
                 </div>
-                <form method="post" enctype="multipart/form-place">
-                    <div class="field">
-                        <label class="label">Username</label>
-                        <div class="control has-icons-right">
-                            <input class="input" type="text" name="userId" placeholder="Username" autofocus required>
-                            <span class="icon is-small is-right">
-                                <i class="fa fa-user"></i>
-                            </span>
-                            {% with user_error = get_flashed_messages(category_filter=['user_error']) %}
-                            {% if user_error %}
-                            <p class="help is-danger">{{ user_error[0] }}</p>
-                            {% endif %}
-                            {% endwith %}
-                        </div>
-                    </div>
 
-                    <div class="field">
-                        <label class="label">Password</label>
-                        <div class="control has-icons-right">
-                            <input class="input" type="password" name="password" placeholder="Password" required>
-                            <span class="icon is-small is-right">
-                                <i class="fa fa-key"></i>
-                            </span>
-                            {% with pass_error = get_flashed_messages(category_filter=['pass_error']) %}
-                            {% if pass_error %}
-                            <p class="help is-danger">{{ pass_error[0] }}</p>
-                            {% endif %}
-                            {% endwith %}
-                        </div>
+                <div class="field">
+                    <label class="label">Password</label>
+                    <div class="control has-icons-right">
+                        <input class="input" type="password" name="password" placeholder="Password" required>
+                        <span class="icon is-small is-right">
+                            <i class="fa fa-key"></i>
+                        </span>
+                        {% with pass_error = get_flashed_messages(category_filter=['pass_error']) %}
+                        {% if pass_error %}
+                        <p class="help is-danger">{{ pass_error[0] }}</p>
+                        {% endif %}
+                        {% endwith %}
                     </div>
-                    <div class="has-text-centered">
-                        <a href="{{url_for('home')}}" class="button is-light">Home</a>
-                        <button type="submit" name="submit"
-                            class="button is-vcentered is-primary is-outlined">Login</button>
-                    </div>
-                </form>
-            </section>
-        </div>
-        <div class="column is-8">
-            <figure>
-                <img src="/static/images/Featured_NJC-College-of-the-Nation.jpg" alt="">
-            </figure>
-        </div>
+                </div>
+                <div class="has-text-centered">
+                    <a href="{{url_for('home')}}" class="button is-light">Home</a>
+                    <button type="submit" name="submit"
+                        class="button is-vcentered is-primary is-outlined">Login</button>
+                </div>
+            </form>
+        </section>
     </div>
-</body>
-
-</html>
+    <div class="column is-8">
+        <figure>
+            <img src="/static/images/Featured_NJC-College-of-the-Nation.jpg" alt="">
+        </figure>
+    </div>
+</div>
+{% endblock %}

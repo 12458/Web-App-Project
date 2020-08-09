@@ -10,6 +10,7 @@ import os
 from functools import wraps
 from graphviz import Graph
 from werkzeug.utils import secure_filename
+import smtplib
 
 ###########
 app = Flask('__name__')
@@ -67,8 +68,7 @@ def login_required(func):
     return decorated_view
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/admin')
 @login_required
@@ -79,7 +79,10 @@ def admin():
     con.close()
     username = session['username']
     return render_template('admin.html', username=username, places=rows, graph=get_link())
-
+@app.route('/manage_admin')
+@login_required
+def manage_admin():
+    pass
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -92,12 +95,12 @@ def login():
         incorrectPass = 'Incorrect password. Please try again. '
         username = request.form['userId']
         password = request.form['password']
-        cur.execute('SELECT id FROM users WHERE id=?', (username,))
+        cur.execute('SELECT id FROM admin WHERE id=?', (username,))
         row = cur.fetchall()
         if len(row) == 0:
             flash(userNotExist, 'user_error')
         else:
-            cur.execute('SELECT * FROM users WHERE id=?', (username,))
+            cur.execute('SELECT * FROM admin WHERE id=?', (username,))
             row = cur.fetchone()
             if check_password_hash(row['password'], password):
                 session['logged_in'] = True
@@ -164,7 +167,7 @@ def view_location(location):
     except Exception as e:
         print(str(e))
     exitFlag = len(linked_locations)
-    return render_template('view_place.html', place=row, linked_locations=linked_locations, exitFlag=exitFlag)
+    return render_template('view_place.html', place=row, linked_locations=linked_locations, exitFlag=exitFlag, Location=location)
 
 
 @ app.route('/edit/<location>', methods=['GET'])
@@ -178,7 +181,7 @@ def edit_location(location):
         con.close()
     except Exception as e:
         print(str(e))
-    return render_template('edit_place.html', place=row)
+    return render_template('edit_place.html', place=row, Location=location)
 
 
 @ app.route('/edit/<location>', methods=['POST'])
@@ -200,10 +203,9 @@ def update_location(location):
             cur.execute('UPDATE places SET name=?, description=?, capacity=?, availability=?, image=? where name=?)',
                         (request.form['name'], request.form['description'], request.form['capacity'], request.form['availability'], request.form['image'], request.form['name']))
         elif request.form['submit'] == 'delete':
-            cur.execute(
-                'DELETE FROM link WHERE location1 = ? OR location2 = ?', (location, location))
+            cur.execute('DELETE FROM link WHERE location1 = ? OR location2 = ?', (location, location))
             cur.execute('DELETE FROM places where name=?', (location,))
-            msg = 'Location Deleted. '
+            msg = 'Location Deleted.'
         con.commit()
         con.close()
     except Exception as e:
@@ -245,8 +247,6 @@ def add_link():
         if request.form['submit'] == 'update':
             cur.execute('INSERT INTO link (location1, location2) VALUES (?,?)',
                         (request.form['location_1'], request.form['location_2']))
-            cur.execute('INSERT INTO link (location1, location2) VALUES (?,?)',
-                        (request.form['location_2'], request.form['location_1']))
         con.commit()
         con.close()
     except Exception as e:
@@ -268,9 +268,9 @@ def get_link():
         con = open_DB()
         con.row_factory = sqlite3.Row
         cur = con.cursor()
-        cur.execute('SELECT * FROM link')
+        cur.execute('SELECT DISTINCT * FROM link')
         edges_raw = cur.fetchall()
-        cur.execute('SELECT Name FROM places')
+        cur.execute('SELECT DISTINCT Name FROM places')
         nodes_raw = cur.fetchall()
         con.close()
     except Exception as e:
