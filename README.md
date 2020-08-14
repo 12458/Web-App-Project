@@ -53,9 +53,9 @@ Example:  Walkthrough for Adding a new location
 ## About The Project
 ### Marking Rubricks
 #### Backend Rubricks
-![Backend Rubricks](docs/images/backend_rubricks.jpg "Backend Rubricks")
+![Backend Rubricks](docs/backend_rubricks.jpg "Backend Rubricks")
 #### Frontend Rubricks
-![Frontend Rubricks](docs/images/frontend_rubricks.jpg "Frontend Rubricks")
+![Frontend Rubricks](docs/frontend_rubricks.jpg "Frontend Rubricks")
 
 ### Built With
 
