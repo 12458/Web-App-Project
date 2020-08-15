@@ -1,45 +1,80 @@
 {% extends "base.html" %}
 {% block title %}Add Link{% endblock %}
+{% block head %}
+<style>
+    svg {
+        width: 100%;
+    }
+</style>
+{% endblock %}
 {% block content %}
-<div class="columns is-mobile is-centered">
-    <div class="column is-half">
-        <div class="box">
-            <form action="{{ url_for('add_link') }}" method="post" enctype="multipart/form-place">
-                <div class="field">
-                    <label class="label">Location 1: </label>
-                    <div class="control">
-                        <div class="select">
-                            <select name="location_1" required>
-                                {% for location in location_list %}
-                                <option value="{{ location['name'] }}">{{ location["name"] }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="field">
-                    <label class="label">Location 2: </label>
-                    <div class="control">
-                        <div class="select">
-                            <select name="location_2" required>
-                                {% for location in location_list %}
-                                <option value="{{ location['name'] }}">{{ location["name"] }}</option>
-                                {% endfor %}
-                            </select>
+<div class="columns">
+    <div class="column is-3 ">
+        <aside class="menu is-hidden-mobile">
+            <p class="menu-label">
+                Administration
+            </p>
+            <ul class="menu-list">
+                <li><a href="{{url_for('show_add_location_form')}}">Add Location</a></li>
+                <li><a href="{{url_for('add_link')}}">Add Link</a></li>
+            </ul>
+        </aside>
+        <aside>
+            <div class="box">
+                <form action="{{ url_for('add_link') }}" method="post" enctype="multipart/form-place">
+                    <div class="field">
+                        <label class="label">Location 1: </label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="location_1" required>
+                                    {% for location in location_list %}
+                                    <option value="{{ location['name'] }}">{{ location["name"] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="field is-grouped">
-                    <div class="control">
-                        <button class="button is-link" type="submit" name="submit" value="update">Add
-                            Link</button>
+
+                    <div class="field">
+                        <label class="label">Location 2: </label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="location_2" required>
+                                    {% for location in location_list %}
+                                    <option value="{{ location['name'] }}">{{ location["name"] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="control">
-                        <button class="button is-link is-light" type="reset" value="Reset">Cancel</button>
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button class="button is-link" type="submit" name="submit" value="update">Add
+                                Link</button>
+                        </div>
+                        <div class="control">
+                            <button class="button is-link is-light" type="reset" value="Reset">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </aside>
+    </div>
+    <div class="column is-9">
+        <div class="container">
+            <div class="card">
+                <header class="card-header">
+                    <p class="card-header-title">
+                        Graphical View
+                    </p>
+                </header>
+                <div class="card-content">
+                    <div class="content">
+                        {{ graph|safe}}
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>

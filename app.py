@@ -18,7 +18,7 @@ app = Flask('__name__')
 # Configuration #
 #################
 
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # limit the maximum allowed payload to 16 megabytes
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # limit the maximum allowed payload to 16 megabytes
 db_path = 'database.db'
 DEBUG = True
 UPLOAD_FOLDER = 'static/images/'
@@ -30,10 +30,12 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 app.secret_key = os.environ.get('SECRET_KEY') or secrets.token_urlsafe(16)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+
 def open_DB():
     connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row
     return connection
+
 
 def login_required(func):
     '''
@@ -67,8 +69,10 @@ def login_required(func):
         return func(*args, **kwargs)
     return decorated_view
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route('/admin')
 @login_required
@@ -79,10 +83,13 @@ def admin():
     con.close()
     username = session['username']
     return render_template('admin.html', username=username, places=rows, graph=get_link())
+
+
 @app.route('/manage_admin')
 @login_required
 def manage_admin():
     pass
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -117,6 +124,7 @@ def home():
     cur = con.execute('SELECT * FROM places')
     rows = cur.fetchall()
     return render_template('main.html', places=rows)
+
 
 @ app.route('/add_location')
 @login_required
@@ -223,35 +231,33 @@ def update_location(location):
     return render_template('view_place.html', place=row)
 
 
-@ app.route('/add_link', methods=['GET'])
-@login_required
-def show_add_link():
-    try:
-        con = open_DB()
-        cur = con.cursor()
-        cur.execute('SELECT name FROM places')
-        location_list = cur.fetchall()
-        con.commit()
-        con.close()
-    except Exception as e:
-        print(str(e))
-    return render_template('add_link.html', location_list=location_list)
-
-
-@ app.route('/add_link', methods=['POST'])
+@ app.route('/add_link', methods=['GET', 'POST'])
 @login_required
 def add_link():
-    try:
-        con = open_DB()
-        cur = con.cursor()
-        if request.form['submit'] == 'update':
-            cur.execute('INSERT INTO link (location1, location2) VALUES (?,?)',
-                        (request.form['location_1'], request.form['location_2']))
-        con.commit()
-        con.close()
-    except Exception as e:
-        print(str(e))
-    return redirect(url_for('admin'))
+    if request.method == 'POST':
+        try:
+            con = open_DB()
+            cur = con.cursor()
+            if request.form['submit'] == 'update':
+                cur.execute('INSERT INTO link (location1, location2) VALUES (?,?)',
+                            (request.form['location_1'], request.form['location_2']))
+            con.commit()
+            con.close()
+        except Exception as e:
+            print(str(e))
+        return redirect(url_for('add_link'))
+    else:
+        try:
+            con = open_DB()
+            cur = con.cursor()
+            cur.execute('SELECT name FROM places')
+            location_list = cur.fetchall()
+            con.commit()
+            con.close()
+        except Exception as e:
+            print(str(e))
+        return render_template('add_link.html', location_list=location_list, graph=get_link())
+
 
 @app.route('/logout')
 @login_required
