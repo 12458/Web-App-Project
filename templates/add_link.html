@@ -29,7 +29,7 @@
                             <div class="select">
                                 <select name="location_1" required>
                                     {% for location in location_list %}
-                                    <option value="{{ location['name'] }}">{{ location["name"] }}</option>
+                                    <option value="{{ location['ID'] }}">{{ location["name"] }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -42,7 +42,7 @@
                             <div class="select">
                                 <select name="location_2" required>
                                     {% for location in location_list %}
-                                    <option value="{{ location['name'] }}">{{ location["name"] }}</option>
+                                    <option value="{{ location['ID'] }}">{{ location['name'] }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

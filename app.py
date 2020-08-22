@@ -167,9 +167,21 @@ def view_location(location):
     try:
         con = open_DB()
         cur = con.cursor()
-        cur.execute('SELECT * FROM places WHERE name=?', (location,))
+        cur.execute('SELECT * FROM places WHERE id=?', (location,))
         row = cur.fetchone()
-        cur.execute('SELECT location2 FROM link WHERE location1=?', (location,))
+        sql_get_link = \
+        '''
+        SELECT p.name, p.ID FROM link l 
+        INNER JOIN places p
+        ON l.location2 = p.id
+        WHERE l.location1=? 
+        UNION 
+        SELECT p.name, p.ID FROM link l 
+        INNER JOIN places p
+        ON l.location1 = p.id
+        WHERE l.location2=? 
+        '''
+        cur.execute(sql_get_link, (location,location))
         linked_locations = cur.fetchall()
         con.close()
     except Exception as e:
@@ -250,7 +262,7 @@ def add_link():
         try:
             con = open_DB()
             cur = con.cursor()
-            cur.execute('SELECT name FROM places')
+            cur.execute('SELECT ID, name FROM places')
             location_list = cur.fetchall()
             con.commit()
             con.close()
@@ -274,7 +286,12 @@ def get_link():
         con = open_DB()
         con.row_factory = sqlite3.Row
         cur = con.cursor()
-        cur.execute('SELECT DISTINCT * FROM link')
+        cur.execute('SELECT DISTINCT a.name,b.name FROM link l \
+        INNER JOIN places a \
+        ON l.location2 = a.id \
+        INNER JOIN places b \
+        ON l.location1 = b.id')
+        con.row_factory = sqlite3.Row
         edges_raw = cur.fetchall()
         cur.execute('SELECT DISTINCT Name FROM places')
         nodes_raw = cur.fetchall()
@@ -297,8 +314,8 @@ def render_graph(**data):
     for node in data['node']:
         graph.node(str(node[0]))
     for edge in data['edge']:
-        graph.edge(str(edge['Location1']), str(edge['Location2']))
-        print(f'Connected {str(edge["Location1"])} <--> {str(edge["Location2"])}')
+        graph.edge(str(edge[0]), str(edge[1]))
+        print(f'Connected {str(edge[0])} <--> {str(edge[1])}')
     chart_output = graph.pipe(format='svg').decode('utf-8')
     return chart_output
 

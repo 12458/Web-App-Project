@@ -52,7 +52,7 @@
             <ul class="menu-list">
                 {% for location in linked_locations %}
                 <li><a
-                        href="{{url_for('view_location',location=location['location2'])}}">{{ location['location2'] }}</a>
+                        href="{{url_for('view_location',location=location['ID'])}}">{{ location['Name'] }}</a>
                 </li>
                 {% endfor %}
             </ul>
