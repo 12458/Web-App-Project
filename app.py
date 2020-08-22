@@ -88,7 +88,21 @@ def admin():
 @app.route('/manage_admin')
 @login_required
 def manage_admin():
-    pass
+    con = open_DB()
+    cur = con.execute('SELECT id FROM admin')
+    rows = cur.fetchall()
+    con.close()
+    return render_template('manage_admin.html', users=rows)
+
+@app.route('/manage_admin/delete/<user>')
+@login_required
+def remove_admin(user):
+    con = open_DB()
+    cur = con.execute('DELETE FROM admin WHERE id=?',(user,))
+    con.commit()
+    con.close()
+    return redirect(url_for('manage_admin'))
+
 
 
 @app.route('/login', methods=['GET', 'POST'])

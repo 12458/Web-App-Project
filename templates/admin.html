@@ -10,15 +10,7 @@
 {% block content %}
 <div class="columns">
     <div class="column is-3 ">
-        <aside class="menu is-hidden-mobile">
-            <p class="menu-label">
-                Administration
-            </p>
-            <ul class="menu-list">
-                <li><a href="{{url_for('show_add_location_form')}}">Add Location</a></li>
-                <li><a href="{{url_for('add_link')}}">Add Link</a></li>
-            </ul>
-        </aside>
+        {% include 'admin_sidebar.html' %}
         <aside>
             <div class="container">
                 <div class="card">
@@ -33,7 +25,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </aside>
     </div>

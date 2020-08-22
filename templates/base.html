@@ -58,6 +58,12 @@
                     Home
                 </a>
                 {% if session['logged_in'] %}
+                <a class="navbar-item" href="{{url_for('admin')}}">
+                    Admin
+                </a>
+                <a class="navbar-item" href="{{url_for('manage_admin')}}">
+                    Manage Admins
+                </a>
                 <a class="navbar-item" href="{{url_for('show_add_location_form')}}">
                     Add location
                 </a>
