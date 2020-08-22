@@ -5,6 +5,59 @@
 <div class="columns">
     <div class="column is-3 ">
         {% include 'admin_sidebar.html' %}
+        <aside>
+            <div class="card">
+                <header class="card-header">
+                    <p class="card-header-title">
+                        Add Admin
+                    </p>
+                </header>
+                <div class="card-content">
+                    <form action="{{ url_for('add_admin') }}" method="post" enctype="multipart/form-place">
+                        <div class="field">
+                            <label class="label">Username</label>
+                            <div class="control has-icons-right">
+                                <input class="input" type="text" name="userId" placeholder="Username" required>
+                                <span class="icon is-small is-right">
+                                    <i class="fa fa-user"></i>
+                                </span>
+                                <p class="help {{ user_color }}">{{ error_user }}</p>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Password</label>
+                            <div class="control has-icons-right">
+                                <input class="input" type="password" name="password" placeholder="Password" required>
+                                <span class="icon is-small is-right">
+                                    <i class="fa fa-key"></i>
+                                </span>
+                                <p class="help {{ pass_color }}">{{ error_pass }}</p>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Confirm Password</label>
+                            <div class="control has-icons-right">
+                                <input class="input" type="password" name="password_confirm"
+                                    placeholder="Confirm Password" required>
+                                <span class="icon is-small is-right">
+                                    <i class="fa fa-key"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-link" type="submit" name="submit" value="update">Add
+                                    User</button>
+                            </div>
+                            <div class="control">
+                                <button class="button is-link is-light" type="reset" value="Reset">Cancel</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </aside>
     </div>
     <div class="column is-9">
         <section class="box">

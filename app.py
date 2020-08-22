@@ -84,25 +84,57 @@ def admin():
     username = session['username']
     return render_template('admin.html', username=username, places=rows, graph=get_link())
 
-
-@app.route('/manage_admin')
-@login_required
-def manage_admin():
+def get_admin():
     con = open_DB()
     cur = con.execute('SELECT id FROM admin')
     rows = cur.fetchall()
     con.close()
+    return rows
+
+@app.route('/manage_admin')
+@login_required
+def manage_admin():
+    rows = get_admin()
     return render_template('manage_admin.html', users=rows)
 
 @app.route('/manage_admin/delete/<user>')
 @login_required
 def remove_admin(user):
     con = open_DB()
-    cur = con.execute('DELETE FROM admin WHERE id=?',(user,))
+    cur = con.execute('DELETE FROM admin WHERE id=?', (user,))
     con.commit()
     con.close()
     return redirect(url_for('manage_admin'))
 
+
+@app.route('/manage_admin/add', methods=['POST'])
+@login_required
+def add_admin():
+    username = request.form['userId']
+    password = request.form['password']
+    confirm_password = request.form['password_confirm']
+    if len(username) == 0:
+        return render_template("manage_admin.html", error_user="Username cannot be left blank", user_color='is-danger', users=get_admin())
+    if len(password) == 0:
+        return render_template("manage_admin.html", error_pass="Password cannot be left blank", pass_color='is-danger', users=get_admin())
+    if password != confirm_password:
+        return render_template('manage_admin.html', error_pass='Password does not match', pass_color='is-danger', users=get_admin())
+    con = open_DB()
+    cur = con.cursor()
+    cur.execute('SELECT id FROM admin')
+    row = cur.fetchall()
+    existing_usernames = [i['id'] for i in row]
+    print(existing_usernames)
+    if username in existing_usernames:
+        return render_template('manage_admin.html', error_user='This username already exists', user_color='is-danger', users=get_admin())
+    try:
+        con = open_DB()
+        con.execute("INSERT INTO admin(id, password) VALUES(?,?)", (username, generate_password_hash(password)))
+        con.commit()
+        con.close()
+        return redirect(url_for('manage_admin'))
+    except Exception as e:
+        print(e)
 
 
 @app.route('/login', methods=['GET', 'POST'])
