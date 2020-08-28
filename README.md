@@ -18,9 +18,10 @@
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
+  - [Additional Information](#additional-information)
+    - [Default login credentials](#default-login-credentials)
   - [Contributing](#contributing)
   - [License](#license)
-  - [Acknowledgements](#acknowledgements)
   
 # Assessment Information
 Due on: Term 3B Week 6, 4 Sep 2020\
@@ -65,17 +66,26 @@ Example:  Walkthrough for Adding a new location
 ## Getting Started
 
 ### Prerequisites
+1. Install required modules by running `pip install -r requirements.txt`
 
 ### Installation
+1. Clone the git repositry: `git clone https://github.com/12458/Web-App-Project.git`
+2. Navigate to the cloned repositry by running `cd Web-App-Project`
+3. Start the Flask server by running `python3.6 app.py` or `flask run`
+
+## Additional Information
+### Default login credentials
+Username: `admin`
+Password: `admin`
 
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
 1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
+2. Create your Feature Branch (`git checkout -b feature/<AmazingFeatureName>`)
+3. Commit your Changes (`git commit -m 'Add some <AmazingFeatureName description>'`)
+4. Push to the Branch (`git push origin feature/<AmazingFeatureName>`)
 5. Open a Pull Request
 
 ## License
@@ -84,7 +94,3 @@ Contributions are what make the open source community such an amazing place to b
 
 - **[GNU GPL V3 license](https://www.gnu.org/licenses/gpl-3.0.en.html)**
 - Copyright 2020 © [Sim Shang En](https://github.com/12458)
-
-## Acknowledgements
-
-- [Bulma](https://bulma.io/)
