@@ -196,10 +196,13 @@ def manage_admin():
     '''
     if request.method == 'POST':
         user = request.form['delete']
-        con = open_DB()
-        cur = con.execute('DELETE FROM admin WHERE id=?', (user,))
-        con.commit()
-        con.close()
+        try:
+            con = open_DB()
+            cur = con.execute('DELETE FROM admin WHERE id=?', (user,))
+            con.commit()
+            con.close()
+        except Exception as e:
+            flash(str(e))
         return redirect(url_for('manage_admin'))
     else:
         rows = get_admin()
@@ -273,6 +276,24 @@ def add_location():
         except Exception as e:
             flash(str(e))
         return render_template('add_place.html', places=location)
+
+@ app.route('/update_link', methods=['POST'])
+@login_required
+def update_link():
+    location_id = request.form['id']
+    linked_locations = request.form.getlist('updated_locations')
+    try:
+        con = open_DB()
+        # Delete all current links
+        cur = con.execute('DELETE FROM link WHERE location1=? OR location2=?', (location_id,location_id))
+        for new_link_id in linked_locations:
+            cur = con.execute('INSERT INTO link (location1, location2) VALUES (?,?)', (location_id,new_link_id))
+        con.commit()
+        con.close()
+    except Exception as e:
+        flash(str(e))
+    return redirect(url_for('home'))
+    
 
 
 @ app.route('/view_location/<location>')
@@ -358,12 +379,36 @@ def update_location(location_id):
         try:
             con = open_DB()
             cur = con.cursor()
+            sql_get_link = \
+                '''
+            SELECT places.name as Place, places.ID as ID, IFNULL((p.id > 0),0) as Linked
+            FROM places LEFT OUTER JOIN
+            (SELECT p.name, p.ID FROM link l 
+            INNER JOIN places p
+            ON l.location2 = p.id
+            WHERE l.location1=?
+            UNION 
+            SELECT p.name, p.ID FROM link l 
+            INNER JOIN places p
+            ON l.location1 = p.id
+            WHERE l.location2=?) p
+            ON places.id = p.id
+            ORDER BY Linked DESC, Place ASC
+            '''
+            cur.execute(sql_get_link, (location_id, location_id))
+            linked_locations = cur.fetchall()           
+            con.close()
+        except Exception as e:
+            flash(str(e))
+        try:
+            con = open_DB()
+            cur = con.cursor()
             cur.execute('SELECT * FROM places where id=?', (location_id,))
             row = cur.fetchone()
             con.close()
         except Exception as e:
             flash(str(e))
-        return render_template('edit_place.html', place=row, Location=location_id)
+        return render_template('edit_place.html', place=row, Location=location_id, linked_locations=linked_locations)
 
 
 @ app.route('/add_link', methods=['GET', 'POST'])
