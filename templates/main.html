@@ -15,38 +15,44 @@
 <div class="columns is-multiline">
     {% for place in places %}
     <div class="column is-one-quarter">
-        <a href="{{ url_for('view_location', location=place['Name']) }}">
-            <div class="card">
-                <header class="card-header">
-                    <p class="card-header-title">
-                        <a href="{{ url_for('view_location', location=place['ID']) }} ">
-                            {{place["Name"]}}</a>
-                    </p>
-                </header>
-                <div class="card-image">
-                    <figure class="image is-16by9">
-                        <img src="/static/images/{{place['image']}}" alt="Placeholder image">
-                    </figure>
-                </div>
-                <div class="card-content">
-                    <div class="field is-grouped is-grouped-multiline">
-                        <div class="control">
-                            <div class="tags has-addons">
-                                <span class="tag is-dark">Capacity:</span>
-                                <span class="tag is-is-info">{{place["Capacity"]}}</span>
-                            </div>
+        <div class="container">
+            <div class="is-centered">
+                <a href="{{ url_for('view_location', location=place['Name']) }}">
+                    <div class="card">
+                        <header class="card-header">
+                            <p class="card-header-title">
+                                <a href="{{ url_for('view_location', location=place['ID']) }} ">
+                                    {{place["Name"]}}</a>
+                            </p>
+                        </header>
+                        <div class="card-image">
+                            <figure class="image is-16by9">
+                                <img src="/static/images/{{place['image']}}" alt="Placeholder image">
+                            </figure>
                         </div>
-                        <div class="control">
-                            <div class="tags has-addons">
-                                <span class="tag is-dark">Available:</span>
-                                <span class="tag is-primary">{{place["Availability"]}}</span>
+                        <div class="card-content">
+                            <div class="field is-grouped is-grouped-multiline">
+                                <div class="control">
+                                    <div class="tags has-addons">
+                                        <span class="tag is-dark">Capacity:</span>
+                                        <span class="tag is-is-info">{{place["Capacity"]}}</span>
+                                    </div>
+                                </div>
+                                <div class="control">
+                                    <div class="tags has-addons">
+                                        <span class="tag is-dark">Available:</span>
+                                        <span class="tag is-primary">{{place["Availability"]}}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
-        </a>
+        </div>
+
     </div>
     {% endfor %}
 </div>
+
 {% endblock %}

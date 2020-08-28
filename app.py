@@ -356,7 +356,7 @@ def render_graph(**data):
     Edge should be a nested list --> [['A','B'],['B','C']]
     Returns SVG code: Put in render_template directly
     '''
-    graph = Graph('Places', engine='neato')
+    graph = Graph('Places', engine='fdp')
     for node in data['node']:
         graph.node(str(node[0]))
     for edge in data['edge']:
