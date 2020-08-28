@@ -75,71 +75,12 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route('/admin')
-@login_required
-def admin():
+@ app.route('/')
+def home():
     con = open_DB()
     cur = con.execute('SELECT * FROM places')
     rows = cur.fetchall()
-    con.close()
-    username = session['username']
-    return render_template('admin.html', username=username, places=rows, graph=get_link())
-
-
-def get_admin():
-    con = open_DB()
-    cur = con.execute('SELECT id FROM admin')
-    rows = cur.fetchall()
-    con.close()
-    return rows
-
-
-@app.route('/manage_admin')
-@login_required
-def manage_admin():
-    rows = get_admin()
-    return render_template('manage_admin.html', users=rows)
-
-
-@app.route('/manage_admin/delete/<user>')
-@login_required
-def remove_admin(user):
-    con = open_DB()
-    cur = con.execute('DELETE FROM admin WHERE id=?', (user,))
-    con.commit()
-    con.close()
-    return redirect(url_for('manage_admin'))
-
-
-@app.route('/manage_admin/add', methods=['POST'])
-@login_required
-def add_admin():
-    username = request.form['userId']
-    password = request.form['password']
-    confirm_password = request.form['password_confirm']
-    if len(username) == 0:
-        return render_template("manage_admin.html", error_user="Username cannot be left blank", user_color='is-danger', users=get_admin())
-    if len(password) == 0:
-        return render_template("manage_admin.html", error_pass="Password cannot be left blank", pass_color='is-danger', users=get_admin())
-    if password != confirm_password:
-        return render_template('manage_admin.html', error_pass='Password does not match', pass_color='is-danger', users=get_admin())
-    con = open_DB()
-    cur = con.cursor()
-    cur.execute('SELECT id FROM admin')
-    row = cur.fetchall()
-    existing_usernames = [i['id'] for i in row]
-    print(existing_usernames)
-    if username in existing_usernames:
-        return render_template('manage_admin.html', error_user='This username already exists', user_color='is-danger', users=get_admin())
-    try:
-        con = open_DB()
-        con.execute("INSERT INTO admin(id, password) VALUES(?,?)",
-                    (username, generate_password_hash(password)))
-        con.commit()
-        con.close()
-        return redirect(url_for('manage_admin'))
-    except Exception as e:
-        print(e)
+    return render_template('main.html', places=rows)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -168,52 +109,123 @@ def login():
                 flash(incorrectPass, 'pass_error')
     return render_template('login.html')
 
-
-@ app.route('/')
-def home():
+@app.route('/admin')
+@login_required
+def admin():
+    '''
+    Viewfunction to serve main admin page
+    '''
     con = open_DB()
     cur = con.execute('SELECT * FROM places')
     rows = cur.fetchall()
-    return render_template('main.html', places=rows)
+    con.close()
+    username = session['username']
+    return render_template('admin.html', username=username, places=rows, graph=get_link())
 
 
-@ app.route('/add_location')
-@login_required
-def show_add_location_form():
-    return render_template('add_place.html')
-
-
-@ app.route('/submit', methods=['POST'])
-@login_required
-def submit_add_location():
-    name = request.form['name']
-    description = request.form['description']
-    capacity = request.form['capacity']
-    availability = request.form['availability']
+def get_admin():
+    '''
+    Helper function to retreive admin(s) from DB
+    '''
     con = open_DB()
-    if 'image' in request.files:
-        image_file = request.files['image']
-        if image_file and allowed_file(image_file.filename):
-            image_file_name = secure_filename(image_file.filename)
-            image_file.save(app.config['UPLOAD_FOLDER'] + image_file_name)
-            try:
-                con.execute('INSERT INTO places(Name, Description, Capacity, Availability, Image) VALUES (?,?,?,?,?)',
-                            (name, description, capacity, availability, image_file_name))
-            except Exception as e:
-                print(str(e))
-    else:
-        try:
-            con.execute('INSERT INTO places(Name, Description, Capacity, Availability) VALUES (?,?,?,?)',
-                        (name, description, capacity, availability))
-        except Exception as e:
-            print(str(e))
+    cur = con.execute('SELECT id FROM admin')
+    rows = cur.fetchall()
+    con.close()
+    return rows
+
+
+@app.route('/manage_admin')
+@login_required
+def manage_admin():
+    '''
+    Viewfunction to serve admin management page
+    '''
+    rows = get_admin()
+    return render_template('manage_admin.html', users=rows)
+
+
+@app.route('/manage_admin/delete/<user>')
+@login_required
+def remove_admin(user):
+    '''
+    Viewfunction to handle removing administrators
+    '''
+    con = open_DB()
+    cur = con.execute('DELETE FROM admin WHERE id=?', (user,))
     con.commit()
     con.close()
-    return redirect(url_for('home'))
+    return redirect(url_for('manage_admin'))
 
+
+@app.route('/manage_admin/add', methods=['POST'])
+@login_required
+def add_admin():
+    '''
+    Viewfunction to handle adding administrators
+    '''
+    username = request.form['userId']
+    password = request.form['password']
+    confirm_password = request.form['password_confirm']
+    if len(username) == 0:
+        return render_template("manage_admin.html", error_user="Username cannot be left blank", user_color='is-danger', users=get_admin())
+    if len(password) == 0:
+        return render_template("manage_admin.html", error_pass="Password cannot be left blank", pass_color='is-danger', users=get_admin())
+    if password != confirm_password:
+        return render_template('manage_admin.html', error_pass='Password does not match', pass_color='is-danger', users=get_admin())
+    con = open_DB()
+    cur = con.cursor()
+    cur.execute('SELECT id FROM admin')
+    row = cur.fetchall()
+    existing_usernames = [i['id'] for i in row]
+    print(existing_usernames)
+    if username in existing_usernames:
+        return render_template('manage_admin.html', error_user='This username already exists', user_color='is-danger', users=get_admin())
+    try:
+        con = open_DB()
+        con.execute("INSERT INTO admin(id, password) VALUES(?,?)", (username, generate_password_hash(password)))
+        con.commit()
+        con.close()
+        return redirect(url_for('manage_admin'))
+    except Exception as e:
+        print(e)
+
+
+@ app.route('/add_location', methods=['GET','POST'])
+@login_required
+def add_location():
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        capacity = request.form['capacity']
+        availability = request.form['availability']
+        con = open_DB()
+        if 'image' in request.files:
+            image_file = request.files['image']
+            if image_file and allowed_file(image_file.filename):
+                image_file_name = secure_filename(image_file.filename)
+                image_file.save(app.config['UPLOAD_FOLDER'] + image_file_name)
+                try:
+                    con.execute('INSERT INTO places(Name, Description, Capacity, Availability, Image) VALUES (?,?,?,?,?)',
+                                (name, description, capacity, availability, image_file_name))
+                except Exception as e:
+                    print(str(e))
+        else:
+            try:
+                con.execute('INSERT INTO places(Name, Description, Capacity, Availability) VALUES (?,?,?,?)',
+                            (name, description, capacity, availability))
+            except Exception as e:
+                print(str(e))
+        con.commit()
+        con.close()
+        return redirect(url_for('home'))
+    else:
+        return render_template('add_place.html')
 
 @ app.route('/view_location/<location>', methods=['GET', 'POST'])
 def view_location(location):
+    '''
+    Viewfunction to serve an location requested by the user
+    '''
     linked_locations = []
     try:
         con = open_DB()
@@ -245,6 +257,9 @@ def view_location(location):
 @ app.route('/edit/<location_id>', methods=['GET', 'POST'])
 @login_required
 def update_location(location_id):
+    '''
+    Viewfunction to edit or delete existing location
+    '''
     if request.method == 'POST':
         image_file_name = ''
         if 'image' in request.files:
@@ -287,13 +302,15 @@ def update_location(location_id):
 @ app.route('/add_link', methods=['GET', 'POST'])
 @login_required
 def add_link():
+    '''
+    Viewfunction to add a exit between two locations
+    '''
     if request.method == 'POST':
         try:
             con = open_DB()
             cur = con.cursor()
             if request.form['submit'] == 'update':
-                cur.execute('INSERT INTO link (location1, location2) VALUES (?,?)',
-                            (request.form['location_1'], request.form['location_2']))
+                cur.execute('INSERT INTO link (location1, location2) VALUES (?,?)', (request.form['location_1'], request.form['location_2']))
             con.commit()
             con.close()
         except Exception as e:
@@ -327,11 +344,15 @@ def get_link():
         con = open_DB()
         con.row_factory = sqlite3.Row
         cur = con.cursor()
-        cur.execute('SELECT DISTINCT a.name,b.name FROM link l \
-        INNER JOIN places a \
-        ON l.location2 = a.id \
-        INNER JOIN places b \
-        ON l.location1 = b.id')
+        sql_statement = \
+        '''
+        SELECT DISTINCT a.name,b.name FROM link l 
+        INNER JOIN places a 
+        ON l.location2 = a.id 
+        INNER JOIN places b 
+        ON l.location1 = b.id
+        '''
+        cur.execute(sql_statement)
         con.row_factory = sqlite3.Row
         edges_raw = cur.fetchall()
         cur.execute('SELECT DISTINCT Name FROM places')
