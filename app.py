@@ -233,7 +233,7 @@ def view_location(location):
     except Exception as e:
         print(str(e))
     exitFlag = len(linked_locations)
-    return render_template('view_place.html', place=row, linked_locations=linked_locations, exitFlag=exitFlag, Location=location)
+    return render_template('view_place.html', place=row, linked_locations=linked_locations, exitFlag=exitFlag)
 
 
 @ app.route('/edit/<location>', methods=['GET'])
