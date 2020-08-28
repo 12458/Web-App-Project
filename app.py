@@ -109,6 +109,7 @@ def login():
                 flash(incorrectPass, 'pass_error')
     return render_template('login.html')
 
+
 @app.route('/admin')
 @login_required
 def admin():
@@ -134,27 +135,22 @@ def get_admin():
     return rows
 
 
-@app.route('/manage_admin')
+@app.route('/manage_admin', methods=['GET', 'POST'])
 @login_required
 def manage_admin():
     '''
     Viewfunction to serve admin management page
     '''
-    rows = get_admin()
-    return render_template('manage_admin.html', users=rows)
-
-
-@app.route('/manage_admin/delete/<user>')
-@login_required
-def remove_admin(user):
-    '''
-    Viewfunction to handle removing administrators
-    '''
-    con = open_DB()
-    cur = con.execute('DELETE FROM admin WHERE id=?', (user,))
-    con.commit()
-    con.close()
-    return redirect(url_for('manage_admin'))
+    if request.method == 'POST':
+        user = request.form['delete']
+        con = open_DB()
+        cur = con.execute('DELETE FROM admin WHERE id=?', (user,))
+        con.commit()
+        con.close()
+        return redirect(url_for('manage_admin'))
+    else:
+        rows = get_admin()
+        return render_template('manage_admin.html', users=rows)
 
 
 @app.route('/manage_admin/add', methods=['POST'])
@@ -190,7 +186,7 @@ def add_admin():
         print(e)
 
 
-@ app.route('/add_location', methods=['GET','POST'])
+@ app.route('/add_location', methods=['GET', 'POST'])
 @login_required
 def add_location():
     if request.method == 'POST':
@@ -220,6 +216,7 @@ def add_location():
         return redirect(url_for('home'))
     else:
         return render_template('add_place.html')
+
 
 @ app.route('/view_location/<location>', methods=['GET', 'POST'])
 def view_location(location):
@@ -345,7 +342,7 @@ def get_link():
         con.row_factory = sqlite3.Row
         cur = con.cursor()
         sql_statement = \
-        '''
+            '''
         SELECT DISTINCT a.name,b.name FROM link l 
         INNER JOIN places a 
         ON l.location2 = a.id 
