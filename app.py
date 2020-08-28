@@ -10,7 +10,6 @@ import os
 from functools import wraps
 from graphviz import Graph
 from werkzeug.utils import secure_filename
-import smtplib
 
 ###########
 app = Flask('__name__')
@@ -78,7 +77,7 @@ def allowed_file(filename):
 def get_locations():
     con = open_DB()
     cur = con.cursor()
-    cur.execute('SELECT * FROM places')
+    cur.execute('SELECT * FROM places ORDER BY Name')
     location_list = cur.fetchall()
     con.close()
     return location_list
@@ -386,6 +385,23 @@ def add_link():
         except Exception as error:
             flash(str(error))
         return render_template('add_link.html', location_list=location_list, graph=get_link())
+
+
+@ app.route('/remove_link', methods=['POST'])
+@login_required
+def remove_link():
+    location1 = request.form['location_1']
+    location2 = request.form['location_2']
+    try:
+        con = open_DB()
+        cur = con.cursor()
+        if request.form['submit'] == 'update':
+            cur.execute('DELETE FROM link WHERE ((location1 = ? AND location2 = ?) OR (location1 = ? AND location2 = ?))', (location1, location2, location2, location1))
+        con.commit()
+        con.close()
+    except Exception as error:
+        abort(500)
+    return redirect('add_link')
 
 
 @app.route('/logout')
