@@ -268,7 +268,11 @@ def add_location():
         con.close()
         return redirect(url_for('home'))
     else:
-        return render_template('add_place.html')
+        try:
+            location = get_locations()
+        except Exception as e:
+            flash(str(e))
+        return render_template('add_place.html', places=location)
 
 
 @ app.route('/view_location/<location>')

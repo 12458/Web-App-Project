@@ -1,77 +1,101 @@
 {% extends "base.html" %}
 {% block title %}Add Location{% endblock %}
 {% block content %}
-<div class="box">
-    <form action="/add_location" method="post" enctype="multipart/form-data">
+<div class="columns">
+    <div class="column is-3 ">
+        <aside>
+            <div class="box">
+                <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>Existing Places</th>
+                        </tr>
+                    </thead>
+                    {% for place in places %}
+                    <tr>
+                        <td>{{ place['Name'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </aside>
+    </div>
+    <div class="column is-9">
         {% include 'error.html' %}
-        <div class="field">
-            <label class="label">Location Name: </label>
-            <div class="control">
-                <input type="text" class="input" id="name" name="name" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Description: </label>
-            <div class="control">
-                <textarea id="description" name="description" class="textarea" required></textarea>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Capacity: </label>
-            <div class="control">
-                <input type="number" class="input" id="capacity" name="capacity" required>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Availability: </label>
-            <div class="control">
-                <label class="radio">
-                    <input type="radio" value="Yes" name="availability">
-                    Yes
-                </label>
-                <label class="radio">
-                    <input type="radio" value="No" name="availability">
-                    No
-                </label>
-            </div>
-        </div>
-        <div class="field">
-            <div id="image" class="file has-name">
-                <label class="file-label">
-                    <input class="file-input" type="file" name="image">
-                    <span class="file-cta">
-                        <span class="file-icon">
-                            <i class="fas fa-upload"></i>
-                        </span>
-                        <span class="file-label">
-                            Location Image
-                        </span>
-                    </span>
-                    <span class="file-name">
-                        No image uploaded
-                    </span>
-                </label>
-            </div>
+        <div class="container">
+            <div class="box">
+                <form action="/add_location" method="post" enctype="multipart/form-data">
+                    {% include 'error.html' %}
+                    <div class="field">
+                        <label class="label">Location Name: </label>
+                        <div class="control">
+                            <input type="text" class="input" id="name" name="name" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Description: </label>
+                        <div class="control">
+                            <textarea id="description" name="description" class="textarea" required></textarea>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Capacity: </label>
+                        <div class="control">
+                            <input type="number" class="input" id="capacity" name="capacity" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Availability: </label>
+                        <div class="control">
+                            <label class="radio">
+                                <input type="radio" value="Yes" name="availability">
+                                Yes
+                            </label>
+                            <label class="radio">
+                                <input type="radio" value="No" name="availability">
+                                No
+                            </label>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div id="image" class="file has-name">
+                            <label class="file-label">
+                                <input class="file-input" type="file" name="image">
+                                <span class="file-cta">
+                                    <span class="file-icon">
+                                        <i class="fas fa-upload"></i>
+                                    </span>
+                                    <span class="file-label">
+                                        Location Image
+                                    </span>
+                                </span>
+                                <span class="file-name">
+                                    No image uploaded
+                                </span>
+                            </label>
+                        </div>
 
-            <script>
-                const fileInput = document.querySelector('#image input[type=file]');
-                fileInput.onchange = () => {
-                    if (fileInput.files.length > 0) {
-                        const fileName = document.querySelector('#image .file-name');
-                        fileName.textContent = fileInput.files[0].name;
-                    }
-                }
-            </script>
-        </div>
-        <div class="field is-grouped">
-            <div class="control">
-                <button class="button is-success" type="submit">Add Location</button>
+                        <script>
+                            const fileInput = document.querySelector('#image input[type=file]');
+                            fileInput.onchange = () => {
+                                if (fileInput.files.length > 0) {
+                                    const fileName = document.querySelector('#image .file-name');
+                                    fileName.textContent = fileInput.files[0].name;
+                                }
+                            }
+                        </script>
+                    </div>
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button class="button is-success" type="submit">Add Location</button>
+                        </div>
+                        <div class="control">
+                            <button class="button is-link is-light" type="reset">Cancel</button>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div class="control">
-                <button class="button is-link is-light" type="reset">Cancel</button>
-            </div>
         </div>
-    </form>
+    </div>
 </div>
-</section>
 {% endblock %}
