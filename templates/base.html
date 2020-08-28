@@ -77,14 +77,18 @@
                 <div class="navbar-item">
                     {% if session['logged_in'] %}
                     <div class="buttons">
-                        <a class="button is-outlined is-danger" href="{{url_for('logout')}}">
-                            Logout
+                        <a class="button is-danger" href="{{url_for('logout')}}">
+                            <span class="icon">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </span>
                         </a>
                     </div>
                     {% else %}
                     <div class="buttons">
                         <a class="button is-outlined is-primary" href="{{url_for('login')}}">
-                            Admin Login
+                            <span class="icon">
+                                <i class="fas fa-sign-in-alt"></i>
+                            </span>
                         </a>
                     </div>
                     {% endif %}
