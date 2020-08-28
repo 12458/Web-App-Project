@@ -75,6 +75,69 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def get_locations():
+    con = open_DB()
+    cur = con.cursor()
+    cur.execute('SELECT * FROM places')
+    location_list = cur.fetchall()
+    con.close()
+    return location_list
+
+
+def get_admin():
+    '''
+    Helper function to retreive admin(s) from DB
+    '''
+    con = open_DB()
+    cur = con.execute('SELECT id FROM admin')
+    rows = cur.fetchall()
+    con.close()
+    return rows
+
+
+def get_link():
+    try:
+        con = open_DB()
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        sql_statement = \
+            '''
+        SELECT DISTINCT a.name,b.name FROM link l 
+        INNER JOIN places a 
+        ON l.location2 = a.id 
+        INNER JOIN places b 
+        ON l.location1 = b.id
+        '''
+        cur.execute(sql_statement)
+        con.row_factory = sqlite3.Row
+        edges_raw = cur.fetchall()
+        cur.execute('SELECT DISTINCT Name FROM places')
+        nodes_raw = cur.fetchall()
+        con.close()
+    except Exception as e:
+        print(str(e))
+    return render_graph(node=nodes_raw, edge=edges_raw)
+
+
+def render_graph(**data):
+    '''
+    Uses Graphviz to create a visual representation of the links between places
+    Takes in Arbitrary Keyword Arguments, **kwargs
+    Expects 2 parameters: Node and Edge
+    Node should be a 1D list --> ['A','B','C']
+    Edge should be a nested list --> [['A','B'],['B','C']]
+    Returns SVG code: Put in render_template directly
+    '''
+    graph = Graph('Places', engine='fdp')
+    for node in data['node']:
+        graph.node(str(node[0]))
+    for edge in data['edge']:
+        graph.edge(str(edge[0]), str(edge[1]))
+        print(f'Connected {str(edge[0])} <--> {str(edge[1])}')
+    chart_output = graph.pipe(format='svg').decode('utf-8')
+    return chart_output
+
+
 @ app.route('/')
 def home():
     con = open_DB()
@@ -116,23 +179,14 @@ def admin():
     '''
     Viewfunction to serve main admin page
     '''
-    con = open_DB()
-    cur = con.execute('SELECT * FROM places')
-    rows = cur.fetchall()
-    con.close()
+    try:
+        location_list = get_locations()
+    except Exception as error:
+        # Admin is trusted so showing them raw error messages is OK
+        flash(str(error))
+        con = open_DB()
     username = session['username']
-    return render_template('admin.html', username=username, places=rows, graph=get_link())
-
-
-def get_admin():
-    '''
-    Helper function to retreive admin(s) from DB
-    '''
-    con = open_DB()
-    cur = con.execute('SELECT id FROM admin')
-    rows = cur.fetchall()
-    con.close()
-    return rows
+    return render_template('admin.html', username=username, places=location_list, graph=get_link())
 
 
 @app.route('/manage_admin', methods=['GET', 'POST'])
@@ -218,12 +272,23 @@ def add_location():
         return render_template('add_place.html')
 
 
-@ app.route('/view_location/<location>', methods=['GET', 'POST'])
+@ app.route('/view_location/<location>')
 def view_location(location):
     '''
     Viewfunction to serve an location requested by the user
     '''
-    linked_locations = []
+    linked_locations = []  # Stop flask from complaining when there is no links
+    try:
+        locations = get_locations()
+        locations = [i['id'] for i in locations]
+        location_id = int(location)
+    except Exception as e:
+        if session['logged_in']:
+            flash(str(e))
+        else:
+            flash('An error has occured. Please try again')
+    if location_id not in locations:
+        abort(404)
     try:
         con = open_DB()
         cur = con.cursor()
@@ -245,9 +310,11 @@ def view_location(location):
         linked_locations = cur.fetchall()
         con.close()
     except Exception as e:
-        print(str(e))
-    exitFlag = len(linked_locations)
-    return render_template('view_place.html', place=row, linked_locations=linked_locations, exitFlag=exitFlag)
+        if session['logged_in']:
+            flash(str(e))
+        else:
+            flash('An error has occured. Please try again')
+    return render_template('view_place.html', place=row, linked_locations=linked_locations)
 
 
 # Note radio button not working need to fix
@@ -280,7 +347,7 @@ def update_location(location_id):
             con.commit()
             con.close()
         except Exception as e:
-            print(str(e))
+            flash(str(e))
         if request.form['submit'] == 'delete':
             return redirect(url_for('admin'))
         return redirect(url_for('view_location', location=location_id))
@@ -292,7 +359,7 @@ def update_location(location_id):
             row = cur.fetchone()
             con.close()
         except Exception as e:
-            print(str(e))
+            flash(str(e))
         return render_template('edit_place.html', place=row, Location=location_id)
 
 
@@ -310,19 +377,14 @@ def add_link():
                 cur.execute('INSERT INTO link (location1, location2) VALUES (?,?)', (request.form['location_1'], request.form['location_2']))
             con.commit()
             con.close()
-        except Exception as e:
-            print(str(e))
+        except Exception as error:
+            flash(str(error))
         return redirect(url_for('add_link'))
     else:
         try:
-            con = open_DB()
-            cur = con.cursor()
-            cur.execute('SELECT ID, name FROM places')
-            location_list = cur.fetchall()
-            con.commit()
-            con.close()
-        except Exception as e:
-            print(str(e))
+            location_list = get_locations()
+        except Exception as error:
+            flash(str(error))
         return render_template('add_link.html', location_list=location_list, graph=get_link())
 
 
@@ -334,49 +396,6 @@ def logout():
     '''
     session.clear()
     return redirect(url_for('home'))
-
-
-def get_link():
-    try:
-        con = open_DB()
-        con.row_factory = sqlite3.Row
-        cur = con.cursor()
-        sql_statement = \
-            '''
-        SELECT DISTINCT a.name,b.name FROM link l 
-        INNER JOIN places a 
-        ON l.location2 = a.id 
-        INNER JOIN places b 
-        ON l.location1 = b.id
-        '''
-        cur.execute(sql_statement)
-        con.row_factory = sqlite3.Row
-        edges_raw = cur.fetchall()
-        cur.execute('SELECT DISTINCT Name FROM places')
-        nodes_raw = cur.fetchall()
-        con.close()
-    except Exception as e:
-        print(str(e))
-    return render_graph(node=nodes_raw, edge=edges_raw)
-
-
-def render_graph(**data):
-    '''
-    Uses Graphviz to create a visual representation of the links between places
-    Takes in Arbitrary Keyword Arguments, **kwargs
-    Expects 2 parameters: Node and Edge
-    Node should be a 1D list --> ['A','B','C']
-    Edge should be a nested list --> [['A','B'],['B','C']]
-    Returns SVG code: Put in render_template directly
-    '''
-    graph = Graph('Places', engine='fdp')
-    for node in data['node']:
-        graph.node(str(node[0]))
-    for edge in data['edge']:
-        graph.edge(str(edge[0]), str(edge[1]))
-        print(f'Connected {str(edge[0])} <--> {str(edge[1])}')
-    chart_output = graph.pipe(format='svg').decode('utf-8')
-    return chart_output
 
 
 if __name__ == '__main__':

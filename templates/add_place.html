@@ -3,6 +3,7 @@
 {% block content %}
 <div class="box">
     <form action="/add_location" method="post" enctype="multipart/form-data">
+        {% include 'error.html' %}
         <div class="field">
             <label class="label">Location Name: </label>
             <div class="control">
