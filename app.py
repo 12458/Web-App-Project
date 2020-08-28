@@ -18,7 +18,8 @@ app = Flask('__name__')
 # Configuration #
 #################
 
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # limit the maximum allowed payload to 16 megabytes
+# limit the maximum allowed payload to 16 megabytes
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 db_path = 'database.db'
 DEBUG = True
 UPLOAD_FOLDER = 'static/images/'
@@ -84,6 +85,7 @@ def admin():
     username = session['username']
     return render_template('admin.html', username=username, places=rows, graph=get_link())
 
+
 def get_admin():
     con = open_DB()
     cur = con.execute('SELECT id FROM admin')
@@ -91,11 +93,13 @@ def get_admin():
     con.close()
     return rows
 
+
 @app.route('/manage_admin')
 @login_required
 def manage_admin():
     rows = get_admin()
     return render_template('manage_admin.html', users=rows)
+
 
 @app.route('/manage_admin/delete/<user>')
 @login_required
@@ -129,7 +133,8 @@ def add_admin():
         return render_template('manage_admin.html', error_user='This username already exists', user_color='is-danger', users=get_admin())
     try:
         con = open_DB()
-        con.execute("INSERT INTO admin(id, password) VALUES(?,?)", (username, generate_password_hash(password)))
+        con.execute("INSERT INTO admin(id, password) VALUES(?,?)",
+                    (username, generate_password_hash(password)))
         con.commit()
         con.close()
         return redirect(url_for('manage_admin'))
@@ -216,7 +221,7 @@ def view_location(location):
         cur.execute('SELECT * FROM places WHERE id=?', (location,))
         row = cur.fetchone()
         sql_get_link = \
-        '''
+            '''
         SELECT p.name, p.ID FROM link l 
         INNER JOIN places p
         ON l.location2 = p.id
@@ -227,7 +232,7 @@ def view_location(location):
         ON l.location1 = p.id
         WHERE l.location2=? 
         '''
-        cur.execute(sql_get_link, (location,location))
+        cur.execute(sql_get_link, (location, location))
         linked_locations = cur.fetchall()
         con.close()
     except Exception as e:
@@ -236,57 +241,47 @@ def view_location(location):
     return render_template('view_place.html', place=row, linked_locations=linked_locations, exitFlag=exitFlag)
 
 
-@ app.route('/edit/<location>', methods=['GET'])
+# Note radio button not working need to fix
+@ app.route('/edit/<location_id>', methods=['GET', 'POST'])
 @login_required
-def edit_location(location):
-    try:
-        con = open_DB()
-        cur = con.cursor()
-        cur.execute('SELECT * FROM places where name=?', (location,))
-        row = cur.fetchone()
-        con.close()
-    except Exception as e:
-        print(str(e))
-    return render_template('edit_place.html', place=row, Location=location)
-
-
-@ app.route('/edit/<location>', methods=['POST'])
-@login_required
-def update_location(location):
-    image_file_name = ''
-    if 'image' in request.files:
-        image_file = request.files['image']
-        if image_file and allowed_file(image_file.filename):
-            image_file_name = secure_filename(image_file.filename)
-            image_file.save(app.config['UPLOAD_FOLDER'] + image_file_name)
-    try:
-        con = open_DB()
-        cur = con.cursor()
-        if request.form['submit'] == 'update' and image_file_name == '':
-            cur.execute('UPDATE places SET name=?, description=?, capacity=?, availability=? WHERE name=?',
-                        (request.form['name'], request.form['description'], request.form['capacity'], request.form['availability'], request.form['name']))
-        elif request.form['submit'] == 'update' and image_file_name != '':
-            cur.execute('UPDATE places SET name=?, description=?, capacity=?, availability=?, image=? where name=?)',
-                        (request.form['name'], request.form['description'], request.form['capacity'], request.form['availability'], request.form['image'], request.form['name']))
-        elif request.form['submit'] == 'delete':
-            cur.execute('DELETE FROM link WHERE location1 = ? OR location2 = ?', (location, location))
-            cur.execute('DELETE FROM places where name=?', (location,))
-            msg = 'Location Deleted.'
-        con.commit()
-        con.close()
-    except Exception as e:
-        print(str(e))
-    try:
-        con = open_DB()
-        cur = con.cursor()
-        cur.execute('SELECT * FROM places WHERE name=?', (location,))
-        row = cur.fetchone()
-        con.close()
-    except Exception as e:
-        print(str(e))
-    if request.form['submit'] == 'delete':
-        return redirect('/home')
-    return render_template('view_place.html', place=row)
+def update_location(location_id):
+    if request.method == 'POST':
+        image_file_name = ''
+        if 'image' in request.files:
+            image_file = request.files['image']
+            if image_file and allowed_file(image_file.filename):
+                image_file_name = secure_filename(image_file.filename)
+                image_file.save(app.config['UPLOAD_FOLDER'] + image_file_name)
+        try:
+            con = open_DB()
+            cur = con.cursor()
+            if request.form['submit'] == 'update' and image_file_name == '':
+                cur.execute('UPDATE places SET name=?, description=?, capacity=?, availability=? WHERE id=?',
+                            (request.form['name'], request.form['description'], request.form['capacity'], request.form['availability'], location_id))
+            elif request.form['submit'] == 'update' and image_file_name != '':
+                cur.execute('UPDATE places SET name=?, description=?, capacity=?, availability=?, image=? where id=?)',
+                            (request.form['name'], request.form['description'], request.form['capacity'], request.form['availability'], request.form['image'], location_id))
+            elif request.form['submit'] == 'delete':
+                cur.execute(
+                    'DELETE FROM link WHERE location1 = ? OR location2 = ?', (location_id, location_id))
+                cur.execute('DELETE FROM places where id=?', (location_id,))
+            con.commit()
+            con.close()
+        except Exception as e:
+            print(str(e))
+        if request.form['submit'] == 'delete':
+            return redirect(url_for('admin'))
+        return redirect(url_for('view_location', location=location_id))
+    else:
+        try:
+            con = open_DB()
+            cur = con.cursor()
+            cur.execute('SELECT * FROM places where id=?', (location_id,))
+            row = cur.fetchone()
+            con.close()
+        except Exception as e:
+            print(str(e))
+        return render_template('edit_place.html', place=row, Location=location_id)
 
 
 @ app.route('/add_link', methods=['GET', 'POST'])

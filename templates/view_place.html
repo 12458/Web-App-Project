@@ -38,7 +38,7 @@
                 {% if session['logged_in']%}
                 <div class="buttons">
                     <a class="button is-danger is-light"
-                        href="{{ url_for('edit_location', location=place['Name']) }}">Edit</a>
+                        href="{{ url_for('update_location', location_id=place['id']) }}">Edit</a>
                 </div>
                 {% endif %}
             </section>
