@@ -32,6 +32,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 def open_DB():
+    '''
+    Opens and returns a DB connection
+    '''
     connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row
     return connection
@@ -71,10 +74,16 @@ def login_required(func):
 
 
 def allowed_file(filename):
+    '''
+    Ensure no funny filenames are uploaded
+    '''
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def get_locations():
+    '''
+    Retrieve ALL locations ordered by alphabetical order in ascending order
+    '''
     con = open_DB()
     cur = con.cursor()
     cur.execute('SELECT * FROM places ORDER BY Name')
@@ -95,6 +104,9 @@ def get_admin():
 
 
 def get_link():
+    '''
+    Returns Graph (SVG) of the current edges between locations
+    '''
     try:
         con = open_DB()
         con.row_factory = sqlite3.Row
@@ -114,7 +126,7 @@ def get_link():
         nodes_raw = cur.fetchall()
         con.close()
     except Exception as e:
-        print(str(e))
+        flash(str(e))
     return render_graph(node=nodes_raw, edge=edges_raw)
 
 
@@ -139,6 +151,9 @@ def render_graph(**data):
 
 @ app.route('/')
 def home():
+    '''
+    Viewfunction to serve main tour page seen by unauthenticated user
+    '''
     con = open_DB()
     cur = con.execute('SELECT * FROM places')
     rows = cur.fetchall()
@@ -147,6 +162,9 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    '''
+    Viewfunction to serve and handle admin authentication
+    '''
     if 'logged_in' in session:
         return redirect(url_for('admin'))
     if request.method == 'POST':
@@ -245,6 +263,9 @@ def add_admin():
 @ app.route('/add_location', methods=['GET', 'POST'])
 @login_required
 def add_location():
+    '''
+    Viewfunction to handle adding locations
+    '''
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
@@ -280,6 +301,9 @@ def add_location():
 @ app.route('/update_link', methods=['POST'])
 @login_required
 def update_link():
+    '''
+    Viewfunction to handle updating links via checkbox form
+    '''
     location_id = request.form['id']
     linked_locations = request.form.getlist('updated_locations')
     try:
@@ -415,7 +439,7 @@ def update_location(location_id):
 @login_required
 def add_link():
     '''
-    Viewfunction to add a exit between two locations
+    Viewfunction to add a exit between two locations via Manage Link page
     '''
     if request.method == 'POST':
         try:
@@ -439,6 +463,9 @@ def add_link():
 @ app.route('/remove_link', methods=['POST'])
 @login_required
 def remove_link():
+    '''
+    Viewfunction to handle removing exit between two locations via Manage Link page
+    '''
     location1 = request.form['location_1']
     location2 = request.form['location_2']
     try:
