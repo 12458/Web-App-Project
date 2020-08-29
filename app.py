@@ -12,7 +12,9 @@ from graphviz import Graph
 from werkzeug.utils import secure_filename
 
 ###########
+
 app = Flask('__name__')
+
 #################
 # Configuration #
 #################
@@ -20,7 +22,6 @@ app = Flask('__name__')
 # limit the maximum allowed payload to 16 megabytes
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 db_path = 'database.db'
-DEBUG = True
 UPLOAD_FOLDER = 'static/images/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
@@ -298,6 +299,7 @@ def add_location():
             flash(str(e))
         return render_template('add_place.html', places=location)
 
+
 @ app.route('/update_link', methods=['POST'])
 @login_required
 def update_link():
@@ -309,15 +311,14 @@ def update_link():
     try:
         con = open_DB()
         # Delete all current links
-        cur = con.execute('DELETE FROM link WHERE location1=? OR location2=?', (location_id,location_id))
+        cur = con.execute('DELETE FROM link WHERE location1=? OR location2=?', (location_id, location_id))
         for new_link_id in linked_locations:
-            cur = con.execute('INSERT INTO link (location1, location2) VALUES (?,?)', (location_id,new_link_id))
+            cur = con.execute('INSERT INTO link (location1, location2) VALUES (?,?)', (location_id, new_link_id))
         con.commit()
         con.close()
     except Exception as e:
         flash(str(e))
     return redirect(url_for('home'))
-    
 
 
 @ app.route('/view_location/<location>')
@@ -420,7 +421,7 @@ def update_location(location_id):
             ORDER BY Linked DESC, Place ASC
             '''
             cur.execute(sql_get_link, (location_id, location_id))
-            linked_locations = cur.fetchall()           
+            linked_locations = cur.fetchall()
             con.close()
         except Exception as e:
             flash(str(e))
