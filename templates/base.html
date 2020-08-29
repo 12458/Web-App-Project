@@ -54,10 +54,11 @@
 
         <div id="navMenu" class="navbar-menu">
             <div class="navbar-start">
+                {% if not session['logged_in'] %}
                 <a class="navbar-item" href="{{url_for('home')}}">
                     Home
                 </a>
-                {% if session['logged_in'] %}
+                {% else %}
                 <a class="navbar-item" href="{{url_for('admin')}}">
                     Admin
                 </a>
@@ -65,10 +66,10 @@
                     Manage Admins
                 </a>
                 <a class="navbar-item" href="{{url_for('add_location')}}">
-                    Add location
+                    Manage Locations
                 </a>
                 <a class="navbar-item" href="{{url_for('add_link')}}">
-                    Add Link
+                    Manage Exits
                 </a>
                 {% endif %}
             </div>
