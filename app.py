@@ -155,9 +155,12 @@ def home():
     '''
     Viewfunction to serve main tour page seen by unauthenticated user
     '''
-    con = open_DB()
-    cur = con.execute('SELECT * FROM places')
-    rows = cur.fetchall()
+    try:
+        con = open_DB()
+        cur = con.execute('SELECT * FROM places')
+        rows = cur.fetchall()
+    except:
+        flash('An error has occured') # User is not trusted
     return render_template('main.html', places=rows)
 
 
@@ -175,13 +178,19 @@ def login():
         incorrectPass = 'Incorrect password. Please try again. '
         username = request.form['userId']
         password = request.form['password']
-        cur.execute('SELECT id FROM admin WHERE id=?', (username,))
+        try:
+            cur.execute('SELECT id FROM admin WHERE id=?', (username,))
+        except:
+            flash('An error has occured', 'user_error')
         row = cur.fetchall()
         if len(row) == 0:
             flash(userNotExist, 'user_error')
         else:
-            cur.execute('SELECT * FROM admin WHERE id=?', (username,))
-            row = cur.fetchone()
+            try:
+                cur.execute('SELECT * FROM admin WHERE id=?', (username,))
+                row = cur.fetchone()
+            except:
+                flash('An error has occured', 'user_error')
             if check_password_hash(row['password'], password):
                 session['logged_in'] = True
                 session['username'] = username
@@ -248,7 +257,6 @@ def add_admin():
     cur.execute('SELECT id FROM admin')
     row = cur.fetchall()
     existing_usernames = [i['id'] for i in row]
-    print(existing_usernames)
     if username in existing_usernames:
         return render_template('manage_admin.html', error_user='This username already exists', user_color='is-danger', users=get_admin())
     try:
@@ -258,7 +266,7 @@ def add_admin():
         con.close()
         return redirect(url_for('manage_admin'))
     except Exception as e:
-        print(e)
+        flash(str(e))
 
 
 @ app.route('/add_location', methods=['GET', 'POST'])
@@ -282,13 +290,13 @@ def add_location():
                     con.execute('INSERT INTO places(Name, Description, Capacity, Availability, Image) VALUES (?,?,?,?,?)',
                                 (name, description, capacity, availability, image_file_name))
                 except Exception as e:
-                    print(str(e))
+                    flash(str(e))
         else:
             try:
                 con.execute('INSERT INTO places(Name, Description, Capacity, Availability) VALUES (?,?,?,?)',
                             (name, description, capacity, availability))
             except Exception as e:
-                print(str(e))
+                flash(str(e))
         con.commit()
         con.close()
         return redirect(url_for('home'))
