@@ -40,6 +40,10 @@
 - [Logout](/logout)
   - Log out of your admin account
   - Accessible by clicking on the red exit button on the top right of the screen (or in the burger menu on mobile)
+- Analytics
+  - Google Analytics can be used to see web traffic
+  - See `/docs/analytics.png` for evidience of feature
+  ![analytics.png](/docs/analytics.png)
 
 ### Testing login credentials
 Username: `admin`\
