@@ -226,11 +226,21 @@ def manage_admin():
         user = request.form['delete']
         try:
             con = open_DB()
-            cur = con.execute('DELETE FROM admin WHERE id=?', (user,))
-            con.commit()
+            cur = con.execute('SELECT COUNT(*) FROM admin')
+            count = cur.fetchone()
             con.close()
         except Exception as e:
             flash(str(e))
+        if count[0] > 1:
+            try:
+                con = open_DB()
+                cur = con.execute('DELETE FROM admin WHERE id=?', (user,))
+                con.commit()
+                con.close()
+            except Exception as e:
+                flash(str(e))
+        else:
+            flash('There must be at least 1 admin account')
         return redirect(url_for('manage_admin'))
     else:
         rows = get_admin()
