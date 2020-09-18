@@ -5,6 +5,7 @@
 - [H2 Computing Web App Project](#h2-computing-web-app-project)
   - [Table of Contents](#table-of-contents)
   - [Assessment Details](#assessment-details)
+    - [Assessment Feedback](#assessment-feedback)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
@@ -14,6 +15,9 @@
   
 ## Assessment Details
 [Assessment Details](/WEBAPP_REQUIREMENTS.md)
+
+### Assessment Feedback
+[Mr Leong's Feedback](docs/FEEDBACK.pdf)
 
 ## Getting Started
 
